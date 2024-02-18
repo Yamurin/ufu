@@ -1,0 +1,101 @@
+/*
+    Implemente 2 possibilidades de alocação dinâmica em um exercício em que o usuário fornece as dimensões da matriz 
+    e a seguir os elementos pares são exibidos e para os elementos ímpares, o símbolo “- “ é exibido.
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int metodo_1 (int lin, int col);
+int metodo_2 (int lin, int col);
+
+int main ()
+{
+    int lin, col;
+    
+    printf("Número de linhas: ");
+    scanf("%d", &lin);
+   
+    printf("Número de colunas: ");
+    scanf("%d", &col);
+    
+    metodo_1(lin, col);
+    //metodo_2(lin, col);
+}
+
+// Alocação Dinâmica de Matrizes 1: Utilizando ponteiro para ponteiro
+int metodo_1 (int lin, int col)
+{
+    int **mat = (int **) malloc(lin * sizeof(int *));
+    
+    if (mat == NULL) 
+    {
+        printf("ERRO: Nao foi possivel alocar memoria.\n");
+        exit(1);
+    }
+    
+    printf("\nInsira os elementos da matriz: \n");
+    
+    for (int i = 0; i < lin; i++)
+    {
+        mat[i] = (int *) malloc(col * sizeof(int));
+        
+        for (int j = 0; j < col; j++)
+        {
+            printf("mat[%d][%d]: ", i, j);
+            scanf("%d", &mat[i][j]);
+        }
+        printf("\n");
+    }
+    
+    for (int i = 0; i < lin; i++)
+    {
+        for (int j = 0; j < col; j++)
+        {
+            if (mat[i][j] % 2 == 0)
+                printf("%d ", mat[i][j]);
+            else
+                printf("- ");
+        }
+        printf("\n");
+        free(mat[i]);
+    }
+    
+    free(mat);
+    return 0;
+}
+
+// Alocação Dinâmica de Matrizes 2: Utilizando array unidimensional
+int metodo_2 (int lin, int col)
+{
+    int *mat = (int *) malloc (lin * col * sizeof(int));
+    
+    printf("\nInsira os elementos da matriz: \n");
+   
+    for (int i = 0; i < lin; i++)
+    {
+        for (int j = 0; j < col; j++)
+        {
+             printf("mat[%d][%d]: ", i, j); 
+             scanf("%d", &mat[(i * col) + j]);
+        }
+        printf("\n");
+    }
+    
+    for (int i = 0; i < lin; i++)
+    {
+        for (int j = 0; j < col; j++)
+        {
+            int temp = mat[(i * col) + j];
+            if (temp % 2 == 0)
+                printf("%d ",temp);
+            else
+                printf("- ");
+        }
+        printf("\n");
+    }
+    
+    
+    free(mat);
+    return 0;
+}
