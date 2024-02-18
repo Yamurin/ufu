@@ -27,12 +27,10 @@ int main()
        exit(1);
    }
     
-    for (int i = 0; i < lin; i++)
-        mat[i] = (int *) malloc(col * sizeof(int));
-    
     printf("\nInsira os elementos da matriz: \n");
     for (int i = 0; i < lin; i++)
     {
+        mat[i] = (int *) malloc(col * sizeof(int));
         for (int j = 0; j < col; j++)
         {
             printf("Mat[%d][%d]: ", i, j);
@@ -41,7 +39,7 @@ int main()
             if (i == j)
                 somaDiagPrincp += mat[i][j];
                 
-            if (j == lin - j - 1)
+            if (i == lin - j - 1)
                 somaDiagSecund += mat[i][j];
         }
         printf("\n");
