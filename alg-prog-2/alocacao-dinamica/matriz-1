@@ -1,3 +1,8 @@
+/*
+   Programa que receba o nro de linhas e colunas de uma matriz e aloque dinamicamente essa matriz.
+   A seguir, peça ao usuário para fornecer os elementos da matriz. 
+   Mostre a soma dos elementos da diagonal principal e da diagonal secundária.
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
