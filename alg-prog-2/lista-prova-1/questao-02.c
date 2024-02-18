@@ -54,9 +54,12 @@ int main ()
             distancias[lin][col] = tempDistancia;
             printf("[%s - %s] %0.2lf \t", cidades[lin].nome , cidades[col].nome, distancias[lin][col]);
         }
+        free(distancias[lin][col]);
         printf("\n");
     }
-    
+
+    free (cidades);
+    free (distancias);
     return 0;
 }
 
