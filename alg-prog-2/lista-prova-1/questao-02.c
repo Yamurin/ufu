@@ -25,6 +25,13 @@ int main ()
     setbuf(stdin, NULL);
     
     cidade_t *cidades = (cidade_t *) malloc(n * sizeof(cidade_t));
+    double **distancias = (double **) malloc(n * sizeof(double *));
+    
+    if (cidades == NULL || distancias == NULL)
+    {
+        printf("ERRO: Falha ao alocar memoria.\n");
+        exit(1);
+    }
     
     for (int i = 0; i < n; i++)
     {
@@ -39,9 +46,7 @@ int main ()
         
         setbuf(stdin, NULL);
     }
-    
-    double **distancias = (double **) malloc(n * sizeof(double *));
-    
+
     double tempDistancia;
     
     // Cria, preenche e imprime a matriz com as distâncias entre cidades
