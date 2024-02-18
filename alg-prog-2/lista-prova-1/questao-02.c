@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 typedef struct cidade {
         int x, y;
@@ -67,10 +68,7 @@ double calcDistancia(cidade_t cidade1, cidade_t cidade2)
     cat1 = abs(cidade1.x - cidade2.x);
     cat2 = abs(cidade1.y - cidade2.y);
     
-    cat1 *= cat1;
-    cat2 *= cat2;
-    
-    distancia = sqrt(cat1 + cat2);
+    distancia = sqrt( pow(cat1, 2) + pow(cat2, 2) );
     
     return distancia;
 }
