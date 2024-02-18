@@ -1,0 +1,56 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define NUM_NOTAS 3
+
+int main () 
+{
+    typedef struct aluno {
+        int matricula;
+        double notas[NUM_NOTAS];
+    } aluno_t;
+    
+    int numAlunos;
+    int numAlunosAprov = 0;
+    
+    scanf("%d", &numAlunos);
+    
+    aluno_t *alunos = (aluno_t *) malloc (numAlunos * sizeof(aluno_t));
+    aluno_t *alunosAprov =  NULL;
+    
+    if (alunos == NULL)
+    {
+        printf("ERRO: Falha ao alocar memoria.\n");
+        exit (1);
+    }
+    
+    for (int i = 0; i < numAlunos; i++)
+    {
+        int media = 0;
+        
+        printf("matricula: ");
+        scanf("%d", &alunos[i].matricula);
+        
+        for (int j = 0; j < NUM_NOTAS; j++)
+        {
+            scanf("%lf", &alunos[i].notas[j]);
+            media += alunos[i].notas[j];
+        }
+        
+        if ((media / NUM_NOTAS) >= 60)
+        {
+            numAlunosAprov += 1;
+            alunosAprov = (aluno_t *) realloc (alunosAprov, numAlunosAprov * sizeof(aluno_t));
+            alunosAprov[numAlunosAprov - 1] = alunos[i];
+        }
+    }
+    
+    printf("Total de alunos aprovados: %d \n", numAlunosAprov);
+    for (int i = 0; i < numAlunosAprov; i++)
+        printf("%d \n", alunosAprov[i].matricula);
+    
+    free(alunosAprov);
+    free(alunos);
+    
+    return 0;
+}
