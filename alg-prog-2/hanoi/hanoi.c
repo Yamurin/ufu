@@ -1,71 +1,68 @@
 #include <stdio.h>
 
- 
-    // Tela de início do jogo
-    // Mostrar tabuleiro
-    // Ações do jogador
-    // Mover
-    // Verificar se ganhou
-
-
 #define TORRES 3 
 #define BLOCOS 5
 enum Torres { a, b, c };
 
-int menu_opcoes();
-void print_tabuleiro(int tabuleiro[][TORRES]);
-
 int main()
 {
     printf("Iniciando jogo \n");
-    int tabuleiro[BLOCOS][TORRES] = {0};
+    int mat[BLOCOS][TORRES] = {0};
     
      // Popular o tabuleiro inicial
     for(int i = 0; i < BLOCOS; i++)
-        tabuleiro[i][a] = i + 1;
-        
-     print_tabuleiro(tabuleiro);
+        mat[i][a] = i + 1;
     
-    int *pa = &tabuleiro[0][a];
-    int *pb = &tabuleiro[BLOCOS - 1][b];
-    int *pc = &tabuleiro[BLOCOS - 1][c];
+    /*
+        1 0 0
+        2 0 0
+        3 0 0
+        4 0 0
+        5 0 0
+    */
     
-    printf("Mover de A para C quando o jogo esta zerado: \n");
-    // funciona, porém entend como tirar magic numbers
+    int *pa = &mat[0][a];
+    int *pb = NULL;
+    int *pc = NULL;
+    int i, temp;
     
-    int temp = *pa - 1;    
-    *pb = *pa;
-    *pa = 0;
-
-    pa = &tabuleiro[temp+1][a];
-    pb = &tabuleiro[3 - temp][b];
-    
-    print_tabuleiro(tabuleiro);
-    //menu_opcoes();
-    // iniciar jogo
-    return 0;
-}
-
-int menu_opcoes()
-{
-   printf("MENU de opcoes\n");
-   printf("Aperte 1 para mover\n");
-   
-   int opcao;
-   scanf("%d", &opcao);
-   
-   return opcao;
-}
-
-void print_tabuleiro(int tabuleiro[][TORRES])
-{
-    for (int lin = 0; lin < BLOCOS; lin++)
+    while (1)
     {
-        for (int col = 0; col < TORRES; col++ )
-            printf("%d ", tabuleiro[lin][col]);   
-        printf("\n");
+        printf("Opcao: \n");
+        printf("1.A para B \n2.A para C\n3.B para A\n4.B para C\n");
+        scanf("%d", &i);
+        
+        switch (i)
+        {
+            case 1:
+                
+                // como acessar pb?
+                *pb = *pa;
+                temp = *pa; 
+                *pa = 0;
+                pa = &mat[temp][a];
+                break;
+                
+            case 2:
+                temp = BLOCOS - (*pa);
+                pc = &mat[temp][c];
+                *pc = *pa;
+                temp = *pa;  // Calcula qual o indice do ultimo bloco, depois de tirar o de cima
+                *pa = 0;
+                pa = &mat[temp][a];
+                break;
+        }
+        
+         for(int i = 0; i < BLOCOS; i++)
+         {
+             for(int j = 0; j < TORRES; j++)
+                printf("%d ", mat[i][j]);
+            printf("\n");
+         }  
     }
-        
-        
+    
+    
+    return 0;
+    
 }
  
