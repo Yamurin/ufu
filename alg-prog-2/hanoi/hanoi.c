@@ -70,9 +70,21 @@ int main()
     int *pa = &mat[0][a];
     int *pb = NULL;
     int *pc = NULL;
-    int userEscolha;
+    int orig, dest;
     
-    while(mat[0][c] != 5)
+    while (mat[0][c] != 5)
+    {
+        printMatriz();
+        
+        printf("Torre de origem: ");
+        scanf("%d", orig);
+        printf("Torre de destino: ");
+        scanf("%d", dest);
+        
+        moverBloco(ori)
+    }
+   
+    /*while(mat[0][c] != 5)
     {
         printMatriz();
         
@@ -88,10 +100,10 @@ int main()
                 moverBloco(a, c, pa, pc);
                 break;
             case (3):
-                moverBloco(b, a, pb, pa);
+                moverBloco(b, c, pb, pc);
                 break;
             case (4):
-                moverBloco(b, c, pb, pc);
+                moverBloco(b, a, pb, pa);
                 break;
             case (5):
                 moverBloco(c, a, pc, pa);
@@ -101,22 +113,6 @@ int main()
                 break;
             case (7):
                 exit(1);
-        }
-        
-        printMatriz();
-        printf("\n");
-    }
-    
-    // EXEMPLO: Mover de A para C 
-    /*while(mat[0][b] != 5)
-    {
-        mover_bloco(a, b, pa, pc);
-        
-        for (int i = 0; i < BLOCOS; i++)
-        {
-            for (int j = 0; j < TORRES; j++)
-                printf("%d ", mat[i][j]);
-            printf("\n");
         }
         
         printf("\n");
