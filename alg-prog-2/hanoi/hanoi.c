@@ -15,6 +15,11 @@ void printMatriz (void)
                 printf("%d ", mat[i][j]);
             printf("\n");
         }
+        
+    getchar();
+    setbuf(stdin, NULL);
+    
+    return; 
 }
 void printMenu (void)
 {
@@ -47,12 +52,14 @@ void moverBloco(int orig, int dest, int *ptrOr, int *ptrDs)
         i--;
     ptrDs = &mat[i][dest];
     
-    // TODO Erros Handling
-    /*if (*ptrOr >=2 && *ptrOr > *ptrDs)
+    //TODO Erros Handling
+   if (*ptrOr > 1 && *ptrOr > *ptrDs)
     {
         printf("MOVIMENTO INVÁLIDO: Não é permitido mover um bloco maior acima de um bloco de valor menor.\n");
+        getchar();
+        setbuf(stdin, NULL);
         return;
-    }*/
+    }
     
     // Mover bloco da origem para o destino
     *ptrDs = *ptrOr;
@@ -70,21 +77,9 @@ int main()
     int *pa = &mat[0][a];
     int *pb = NULL;
     int *pc = NULL;
-    int orig, dest;
-    
-    while (mat[0][c] != 5)
-    {
-        printMatriz();
-        
-        printf("Torre de origem: ");
-        scanf("%d", orig);
-        printf("Torre de destino: ");
-        scanf("%d", dest);
-        
-        moverBloco(ori)
-    }
+    int userEscolha;
    
-    /*while(mat[0][c] != 5)
+    while(mat[0][c] != 5)
     {
         printMatriz();
         
@@ -116,6 +111,7 @@ int main()
         }
         
         printf("\n");
-    }*/
+        setbuf(stdin, NULL);
+    }
     return 0;
 }
