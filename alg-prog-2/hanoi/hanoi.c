@@ -45,6 +45,7 @@ void moverBloco(int orig, int dest, int *ptrOr, int *ptrDs)
     while(mat[i][orig] == 0)
         i++;
     ptrOr = &mat[i][orig];
+    *ptrOr = mat[i][orig];
     
      // Define o bloco atualmente no topo da pilha de destino
     i = BLOCOS - 1;
@@ -53,14 +54,7 @@ void moverBloco(int orig, int dest, int *ptrOr, int *ptrDs)
     ptrDs = &mat[i][dest];
     
     //TODO Erros Handling
-   if (*ptrOr > 1 && *ptrOr > *ptrDs)
-    {
-        printf("MOVIMENTO INVÁLIDO: Não é permitido mover um bloco maior acima de um bloco de valor menor.\n");
-        getchar();
-        setbuf(stdin, NULL);
-        return;
-    }
-    
+
     // Mover bloco da origem para o destino
     *ptrDs = *ptrOr;
     *ptrOr = 0;  
