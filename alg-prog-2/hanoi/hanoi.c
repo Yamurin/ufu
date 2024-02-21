@@ -37,29 +37,6 @@ void printMenu (void)
     printf(" -> ");
 }
 
-// Transpõe um bloco da pilha de origem para a pilha de destino, informados pelo usuário
-void moverBloco(int orig, int dest, int *ptrOr, int *ptrDs)
-{
-    // Define o bloco atualmente no topo da pilha de origem
-    int i = 0;
-    while(mat[i][orig] == 0)
-        i++;
-    ptrOr = &mat[i][orig];
-    *ptrOr = mat[i][orig];
-    
-     // Define o bloco atualmente no topo da pilha de destino
-    i = BLOCOS - 1;
-    while(mat[i][dest] != 0)
-        i--;
-    ptrDs = &mat[i][dest];
-    
-    //TODO Erros Handling
-
-    // Mover bloco da origem para o destino
-    *ptrDs = *ptrOr;
-    *ptrOr = 0;  
-}
-
 int main()
 {
     printf("Iniciando jogo \n");
@@ -71,41 +48,76 @@ int main()
     int *pa = &mat[0][a];
     int *pb = NULL;
     int *pc = NULL;
-    int userEscolha;
+    int userEscolha ;
    
     while(mat[0][c] != 5)
     {
         printMatriz();
-        
         printMenu();
-        scanf("%d", &userEscolha);
         
+        scanf("%d", &userEscolha);
+
+        int i = 0;
+        int j = BLOCOS - 1;
+            
         switch (userEscolha)
         {
-            case (1):
-                moverBloco(a, b, pa, pb);
+            case (1): // A > B
+                while(mat[j][b] != 0) { j--;}
+                pb = &mat[j][b];
+                *pb = *pa;
+                *pa = 0;
+                while(mat[i][a] == 0) { i++; }
+                pa = &mat[i][a];
                 break;
-            case (2):
-                moverBloco(a, c, pa, pc);
+                
+            case (2): // A > C
+               while(mat[j][c] != 0) { j--;}
+                pc = &mat[j][c];
+                *pc = *pa;
+                *pa = 0;
+                while(mat[i][a] == 0) { i++; }
+                pa = &mat[i][a];
                 break;
-            case (3):
-                moverBloco(b, c, pb, pc);
+                
+            case (3): // B > A
+                while(mat[j][a] != 0) { j--;}
+                pa = &mat[j][a];
+                *pa = *pb;
+                *pb = 0;
+                while(mat[i][b] == 0) { i++; }
+                pa = &mat[i][b];
                 break;
-            case (4):
-                moverBloco(b, a, pb, pa);
+                
+            case (4): // B > C
+               while(mat[j][c] != 0) { j--;}
+                pc = &mat[j][c];
+                *pc = *pb;
+                *pb = 0;
+                while(mat[i][b] == 0) { i++; }
+                pa = &mat[i][b];
                 break;
-            case (5):
-                moverBloco(c, a, pc, pa);
+                
+            case (5): // C > A
+                while(mat[j][a] != 0) { j--;}
+                pa = &mat[j][a];
+                *pa = *pc;
+                *pc = 0;
+                while(mat[i][c] == 0) { i++; }
+                pa = &mat[i][c];
                 break;
-            case (6):
-                moverBloco(c, b, pc, pb);
+                
+            case (6): // C > B
+                while(mat[j][b] != 0) { j--;}
+                pb = &mat[j][b];
+                *pb = *pc;
+                *pc = 0;
+                while(mat[i][c] == 0) { i++; }
+                pc = &mat[i][c];
                 break;
             case (7):
                 exit(1);
         }
-        
-        printf("\n");
-        setbuf(stdin, NULL);
     }
     return 0;
 }
