@@ -1,0 +1,51 @@
+Cada animal é uma struct
+
+o zoológico tem X setores (qtd_setor)
+todo setor tem Y jaulas	(qtd_jaula)
+cada jaula tem Z animais (qtd_animal)
+
+esse sistema é representado em uma matriz . Jaulas por setores, animais por jaulas
+
+o usuário dá o nmro inicial de setores, jaulas e animais.
+
+
+2. cada setor tem um nome:
+
+nomes_setor[q]
+Eh o vetor que armazena o nome de todos os setores. tem a mesma quantidade de elementos de setores do zoológico.
+
+o setor 2 eh representado na matriz como [2][0][0]
+o nome do setor 2 é Aves
+logo nomes_setor[2] = Aves
+
+3. Inserir animais em um setor
+Finja que cada setor começa com 5 jaulas
+mas quero adicionar mais 1 no setor X
+logo 
+realloc 6 posições ao invés de 5, para todos os setores
+depois disso, pego informações para colocar o novo animal do 
+setor X
+
+4. Animal mais pesado o setor
+qual o bicho mais pesado do setor X?
+setor X eh representado na matriz por [X][0][0]
+
+qual o mais pesado da jaula 1 do setorX?
+ele eh mais pesado da jaula 2 do setorX?...
+
+5. Novo setor
+realloc
+
+6. Remove setor
+quero remover o setor 5 (eu tenho 10)
+limpar todo o setor 5
+
+passar o setor 6 para o lugar do 5
+passar o setor 7 para o lugar do 6
+passar o setor 8 para o lugar do 7
+passar o setor 9 para o lugar do 8
+passar o setor 10 para o lugar do 9
+
+realocar o zoológico para caber apenas 9 setores ao invés de 10
+
+7. ideia de opção adicional: encontrar localização do animal pelo nome
