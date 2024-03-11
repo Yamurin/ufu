@@ -26,9 +26,9 @@ void confereMalloc (void *ptr)
     }
 }
 
-/*  brief: Aloca um array contíguo, representando a estrutura dinâmica de três dimensões que contém todos os animais.
-    parameters: Número de setores, jaulas e animais inseridaos pelo usuário.
-    return: Endereço na memória com espaço para todos os animais.   */
+/*  BRIEF: Aloca um array contíguo, representando a estrutura dinâmica de três dimensões que contém todos os animais.
+    PARAMS: Número de setores, jaulas e animais inseridaos pelo usuário.
+    RETURN: Endereço na memória com espaço para todos os animais.   */
 info_animal* iniciarZoo (int qtd_setor, int qtd_jaula, int qtd_animal)
 {
     info_animal* zoo;
@@ -38,23 +38,23 @@ info_animal* iniciarZoo (int qtd_setor, int qtd_jaula, int qtd_animal)
     return zoo;
 }
 
-/*
-    parameters: Endereço do ponteiro que aponta para o primeiro animal do zoológico. 
-*/
+/*  BRIEF: Preenche os dados da struct que representa o animal na primeira posição vazia da jaula indicada, somente se a jaula tiver um espaço vago. 
+    PARAMS: Endereço do ponteiro que aponta para o primeiro animal do zoológico. 
+    RETURN: Nada.   */
+
 void adicionarAnimal (info_animal **zoo, int qtd_setor, int qtd_jaula, int qtd_animal)
 {
-    int i_jaula;
-    int i_setor;
+    int i_jaula, i_setor, idx;
     int i_animal = 0;
-    int idx;
     
     printf("Informe o setor e a jaula do animal: ");
-    scanf("%d %d", &i_jaula, &i_setor);
+    scanf("%d %d", &i_setor, &i_jaula);
     
     i_jaula -= 1;
     i_setor -= 1;
     
-    idx = i_setor * qtd_jaula * qtd_animal + i_jaula * qtd_jaula;
+    // Artimética de ponteiro
+    idx = i_setor * qtd_jaula * qtd_animal + i_jaula * qtd_jaula; 
     
     // Localiza o primeiro espaço vago para animal na jaula indicada.
     while((*zoo)[idx + i_animal].codigo != NULL)
@@ -67,8 +67,39 @@ void adicionarAnimal (info_animal **zoo, int qtd_setor, int qtd_jaula, int qtd_a
         }
     }
     
+    idx += i_animal;
     printf("[-] Pronto para inserir animal na %dº vaga da %dº Jaula do Setor %d (zoo[%d][%d][%d]).\n\n", i_animal+1, i_jaula+1, i_setor+1, i_setor, i_jaula, i_animal);
     
+    printf("\nInsira os dados do animal:\n");
+    
+    setbuf(stdin, NULL);
+    
+    printf("Código: ");
+    (*zoo)[idx].codigo = malloc(TAM_STRING);
+    confereMalloc((*zoo)[idx].codigo);
+    fgets((*zoo)[idx].codigo, TAM_STRING, stdin);
+    
+    setbuf(stdin, NULL);
+    
+    printf("Nome: ");
+    (*zoo)[idx].nome = malloc(TAM_STRING);
+    confereMalloc((*zoo)[idx].nome);
+    fgets((*zoo)[idx].nome, TAM_STRING, stdin);
+    
+    setbuf(stdin, NULL);
+    
+    printf("Espécie: ");
+    (*zoo)[idx].especie = malloc(TAM_STRING);
+    confereMalloc((*zoo)[idx].especie);
+    fgets((*zoo)[idx].especie, TAM_STRING, stdin);
+    
+    printf("Peso: ");
+    scanf("%f", &((*zoo)[idx].peso));
+    
+    printf("Altura: ");
+    scanf("%f", &((*zoo)[idx].altura));
+      
+    printf("%s adicionado(a) com sucesso.\n", (*zoo)[idx].nome);
     return; 
 }
 
@@ -76,6 +107,7 @@ int main ()
 {
     setlocale(LC_ALL, "Portuguese");
     info_animal* zoo;
+    
     // Declaração de valores variáveis para os setores, jaulas e animais.
     int* qtd_setor  = calloc(1, sizeof(int));
     confereMalloc(qtd_setor);
@@ -97,5 +129,6 @@ int main ()
     
     zoo = iniciarZoo (*qtd_setor, *qtd_jaula, *qtd_animal);
     adicionarAnimal (&zoo, *qtd_setor, *qtd_jaula, *qtd_animal);
+    printf("zoo[0][0][0] nome: %s \n peso: %f\n", zoo[6].nome, zoo[6].peso);
     return 0;   
 }
