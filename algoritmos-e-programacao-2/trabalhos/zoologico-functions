@@ -18,31 +18,25 @@ info_animal* iniciarZoo (int qtd_setor, int qtd_jaula, int qtd_animal);
 void adicionarAnimal (info_animal **zoo, int qtd_setor, int qtd_jaula, int qtd_animal);
 void animalMaisPesado (info_animal **zoo, int qtd_setor, int qtd_jaula, int qtd_animal);
 
-// TODO O setor tem que ser identificado por NOME
-void animalMaisPesado (info_animal **zoo, int qtd_setor, int qtd_jaula, int qtd_animal)
+int printMenu ()
 {
-    int i_setor;
-    int idx;
+    printf("1. Acessar catálogo de setores.\n");
+    printf("2. Inserir animais em uma jaula de um setor. \n");
+    printf("3. Procurar animal mais pesado de um dado setor. \n");
     
-    printf("Informe o setor: ");
-    scanf("%d", &i_setor);
-    i_setor -= 1;
+    int i;
+    printf("-> ");
+    scanf("%d", &i);
+    return i;
+}
+
+void preencherCatalogo (char** catalogo)
+{
     
-    idx = i_setor * qtd_jaula * qtd_animal; 
-    info_animal maior;
-    maior.peso = 0;
-    
-    for (int i_animal = idx + 1; i_animal < qtd_animal * qtd_jaula; i_animal++)
-    {
-        if((*zoo)[i_animal].peso > maior.peso)
-            maior = (*zoo)[i_animal];
-    }
-    
-    printf("O animal mais pesado do Setor %d é o(a) %s (%0.2f kg).\n\n", i_setor + 1, maior.nome, maior.peso);
 }
 
 // Assegurar que uma determinada alocação de memória foi bem sucedida.
-void confereMalloc (void *ptr)
+void conferirMalloc (void *ptr)
 {
     if(ptr == NULL)
     {
@@ -54,13 +48,12 @@ void confereMalloc (void *ptr)
 int main ()
 {
     setlocale(LC_ALL, "Portuguese");
-    info_animal* zoo;
     
-    // Declaração de valores variáveis para os setores, jaulas e animais.
+    info_animal* zoo;
+    char** catalogo;
     int qtd_setor, qtd_jaula, qtd_animal;
     
-    do 
-    {
+    do {
         printf("Setores - jaulas em cada setor - animais em cada jaula\n");
         scanf("%d %d %d", &qtd_setor, &qtd_jaula, &qtd_animal);
     
@@ -69,10 +62,37 @@ int main ()
     } while (qtd_setor <= 0 || qtd_jaula <= 0 || qtd_animal <= 0);
     
     
+    printf("Aperte Enter para iniciar o sistema \n");
+    getchar();
     zoo = iniciarZoo (qtd_setor, qtd_jaula, qtd_animal);
-    adicionarAnimal (&zoo, qtd_setor, qtd_jaula, qtd_animal);
-    animalMaisPesado (&zoo, qtd_setor, qtd_jaula, qtd_animal);
+    
+    // Declara vetor com os nomes dos setores
+    catalogo = malloc (qtd_setor * sizeof(char *));
+    conferirMalloc(catalogo);
+    
+    switch (printMenu())
+    {
+        case 2:
+            adicionarAnimal (&zoo, qtd_setor, qtd_jaula, qtd_animal);
+            break;
+            
+        case 3:
+            animalMaisPesado (&zoo, qtd_setor, qtd_jaula, qtd_animal);
+            break;
+    }
     return 0;   
+}
+
+/*  BRIEF: Aloca um array contíguo, representando a estrutura dinâmica de três dimensões que contém todos os animais.
+    PARAMS: Número de setores, jaulas e animais inseridaos pelo usuário.
+    RETURN: Endereço na memória com espaço para todos os animais.   */
+info_animal* iniciarZoo (int qtd_setor, int qtd_jaula, int qtd_animal)
+{
+    info_animal* zoo;
+    zoo = calloc(qtd_setor * qtd_jaula * qtd_animal, sizeof(info_animal));
+    conferirMalloc(zoo);
+    printf("Zoológico alocado com espaço para %d animais.\n\n", qtd_setor * qtd_jaula * qtd_animal);
+    return zoo;
 }
 
 /*  BRIEF: Preenche os dados da struct que representa o animal na primeira posição vazia da jaula indicada, somente se a jaula tiver um espaço vago. 
@@ -83,8 +103,7 @@ void adicionarAnimal (info_animal **zoo, int qtd_setor, int qtd_jaula, int qtd_a
     int i_jaula, i_setor, idx;
     int i_animal = 0;
     
-    do 
-    {
+    do {
         printf("Informe o setor e a jaula do animal: ");
         scanf("%d %d", &i_setor, &i_jaula);
     
@@ -117,41 +136,72 @@ void adicionarAnimal (info_animal **zoo, int qtd_setor, int qtd_jaula, int qtd_a
     
     printf("Código: ");
     (*zoo)[idx].codigo = malloc(TAM_STRING);
-    confereMalloc((*zoo)[idx].codigo);
+    conferirMalloc((*zoo)[idx].codigo);
     fgets((*zoo)[idx].codigo, TAM_STRING, stdin);
     
     setbuf(stdin, NULL);
     
     printf("Nome: ");
     (*zoo)[idx].nome = malloc(TAM_STRING);
-    confereMalloc((*zoo)[idx].nome);
+    conferirMalloc((*zoo)[idx].nome);
     fgets((*zoo)[idx].nome, TAM_STRING, stdin);
     
     setbuf(stdin, NULL);
     
     printf("Espécie: ");
     (*zoo)[idx].especie = malloc(TAM_STRING);
-    confereMalloc((*zoo)[idx].especie);
+    conferirMalloc((*zoo)[idx].especie);
     fgets((*zoo)[idx].especie, TAM_STRING, stdin);
     
-    printf("Peso: ");
-    scanf("%f", &((*zoo)[idx].peso));
+    printf("Peso (maior que 0kg): ");
+    do {
+        scanf("%f", &((*zoo)[idx].peso));
+    } while ((*zoo)[idx].peso == 0);
     
-    printf("Altura: ");
-    scanf("%f", &((*zoo)[idx].altura));
+    printf("Altura (maior que 0m): ");
+    do {
+        scanf("%f", &((*zoo)[idx].altura));
+    } while ((*zoo)[idx].altura == 0);
       
     printf("\n[!] %s adicionado(a) com sucesso.\n", (*zoo)[idx].nome);
     return; 
 }
 
-/*  BRIEF: Aloca um array contíguo, representando a estrutura dinâmica de três dimensões que contém todos os animais.
-    PARAMS: Número de setores, jaulas e animais inseridaos pelo usuário.
-    RETURN: Endereço na memória com espaço para todos os animais.   */
-info_animal* iniciarZoo (int qtd_setor, int qtd_jaula, int qtd_animal)
+// TODO O setor tem que ser identificado por NOME
+void animalMaisPesado (info_animal **zoo, int qtd_setor, int qtd_jaula, int qtd_animal)
 {
-    info_animal* zoo;
-    zoo = calloc(qtd_setor * qtd_jaula * qtd_animal, sizeof(info_animal));
-    confereMalloc(zoo);
-    printf("Zoológico alocado com espaço para %d animais.\n\n", qtd_setor * qtd_jaula * qtd_animal);
-    return zoo;
+    int i_setor;
+    int idx;
+    
+    // Coleta o valor do setor do usuário.
+    do {
+        printf("Informe o setor: ");
+        scanf("%d", &i_setor);
+    
+        if(i_setor > qtd_setor || i_setor <= 0)
+            printf("[!] Você está tentando acessar um setor que não existe!\n\n");
+    } while (i_setor > qtd_setor || i_setor <= 0);
+    
+    i_setor -= 1;
+    info_animal maior;
+    maior.peso = 0;
+    
+    // Aritmética para o primeiro elemento do setor informado
+    idx = i_setor * qtd_jaula * qtd_animal;    
+    
+    if((*zoo)[idx].peso == 0)
+    {
+        printf("O setor informado está vazio.\n");
+        return;
+    }
+    
+    // Percorre todos os animais do setor para encontrar o mais pesado deles.
+    for (int i_animal = idx + 1; i_animal < qtd_animal * qtd_jaula; i_animal++)
+    {
+        if((*zoo)[i_animal].peso > maior.peso)
+            maior = (*zoo)[i_animal];
+    }
+    
+    printf("O animal mais pesado do Setor %d é o(a) %s (%0.2f kg).\n\n", i_setor + 1, maior.nome, maior.peso);
+    return;
 }
