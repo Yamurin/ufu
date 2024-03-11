@@ -4,6 +4,7 @@
 #include <locale.h> // Biblioteca para impressão caracteres do PT-BR
 
 #define TAM_STRING 256
+#define i(a, b, c)
 
 typedef struct {
     char* codigo;
@@ -12,6 +13,8 @@ typedef struct {
     float peso;
     float altura;
 } info_animal;
+
+void adicionarAnimal (info_animal **zoo, int qtd_setor, int qtd_jaula, int qtd_animal);
 
 // Assegurar que uma determinada alocação de memória foi bem sucedida.
 void confereMalloc (void *ptr)
@@ -23,30 +26,50 @@ void confereMalloc (void *ptr)
     }
 }
 
-/*
-    brief: Aloca um array contíguo, representando a estrutura dinâmica de três dimensões que contém todos os animais.
-    
+/*  brief: Aloca um array contíguo, representando a estrutura dinâmica de três dimensões que contém todos os animais.
     parameters: Número de setores, jaulas e animais inseridaos pelo usuário.
-    
-    return: Endereço na memória com espaço para todos os animais.
-*/
-
+    return: Endereço na memória com espaço para todos os animais.   */
 info_animal* iniciarZoo (int qtd_setor, int qtd_jaula, int qtd_animal)
 {
     info_animal* zoo;
     zoo = calloc(qtd_setor * qtd_jaula * qtd_animal, sizeof(info_animal));
     confereMalloc(zoo);
-    printf("Zoológico alocado com espaço para %d animais.\n", qtd_setor * qtd_jaula * qtd_animal);
+    printf("Zoológico alocado com espaço para %d animais.\n\n", qtd_setor * qtd_jaula * qtd_animal);
     return zoo;
 }
 
 /*
     parameters: Endereço do ponteiro que aponta para o primeiro animal do zoológico. 
 */
-void adicionarAnimal (info_animal **zoo, int i_setor, int i_jaula)
+void adicionarAnimal (info_animal **zoo, int qtd_setor, int qtd_jaula, int qtd_animal)
 {
+    int i_jaula;
+    int i_setor;
+    int i_animal = 0;
+    int idx;
     
-    (*zoo)[i].codigo;
+    printf("Informe o setor e a jaula do animal: ");
+    scanf("%d %d", &i_jaula, &i_setor);
+    
+    i_jaula -= 1;
+    i_setor -= 1;
+    
+    idx = i_setor * qtd_jaula * qtd_animal + i_jaula * qtd_jaula;
+    
+    // Localiza o primeiro espaço vago para animal na jaula indicada.
+    while((*zoo)[idx + i_animal].codigo != NULL)
+    {
+        i_animal++;
+        if(i_animal == qtd_animal)
+        {
+            printf("[!] Esta jaula já está com a sua capacidade máxima de animais.");
+            return;
+        }
+    }
+    
+    printf("[-] Pronto para inserir animal na %dº vaga da %dº Jaula do Setor %d (zoo[%d][%d][%d]).\n\n", i_animal+1, i_jaula+1, i_setor+1, i_setor, i_jaula, i_animal);
+    
+    return; 
 }
 
 int main ()
@@ -63,11 +86,16 @@ int main ()
     int* qtd_animal = calloc(1, sizeof(int));
     confereMalloc(qtd_animal);
     
-    printf("Setores - jaulas em cada setor - animais em cada jaula\n");
-    scanf("%d %d %d", qtd_setor, qtd_jaula, qtd_animal);
+    do {
+        printf("Setores - jaulas em cada setor - animais em cada jaula\n");
+        scanf("%d %d %d", qtd_setor, qtd_jaula, qtd_animal);
+    
+        if(*qtd_setor <= 0 || *qtd_jaula <= 0 || *qtd_animal <= 0)
+            printf("Você deve inserir um número positivo maior que zero.\n\n");
+    } while (*qtd_setor <= 0 || *qtd_jaula <= 0 || *qtd_animal <= 0);
+    
     
     zoo = iniciarZoo (*qtd_setor, *qtd_jaula, *qtd_animal);
-    
+    adicionarAnimal (&zoo, *qtd_setor, *qtd_jaula, *qtd_animal);
     return 0;   
 }
-
