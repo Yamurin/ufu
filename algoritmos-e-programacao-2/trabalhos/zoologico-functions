@@ -28,42 +28,8 @@ int printMenu ()
     int i;
     printf("-> ");
     scanf("%d", &i);
+    printf("\n");
     return i;
-}
-
-// Preenche o catálogo a partir do último nome vazio
-void editarCatalogo (char** catalogo, int qtd_setor)
-{
-    int escolha;
-    int aux = strlen (catalogo[qtd_setor - 1]);
-    
-    printf("1. Adicionar nome ao catálogo.\n");
-    printf("2. Voltar.\n");
-    scanf("%d", &escolha);
-    
-    if(escolha == 2)
-        return;
-    
-    // Preencher catálogo
-    if(aux > 0)
-        printf("Todos os setores estão preenchidos, você não pode adicionar mais nenhum.\n");
-    else {
-        for (int i = 0; i < qtd_setor; i++)
-        {
-            aux = strlen (catalogo[i]);
-            if(aux == 0)
-            {
-                printf("\n[!] Renomear Setor %d: ", i+1);
-                setbuf(stdin, NULL);
-                fgets(catalogo[i], 256, stdin);
-                catalogo[i][strcspn(catalogo[i], "\n")] = 0;    // Remove '\n' do final da string. 
-                printf("Setor %d nomeado como \"%s\"\n", i+1, catalogo[i]);
-            } else {
-                continue;
-            }
-        }
-    }
-    return;
 }
 
 // Assegurar que uma determinada alocação de memória foi bem sucedida.
@@ -93,13 +59,13 @@ int main ()
     } while (qtd_setor <= 0 || qtd_jaula <= 0 || qtd_animal <= 0);
     
     
-    printf("Aperte Enter para iniciar o sistema \n");
+    printf("[!] Aperte Enter para iniciar o sistema \n");
     getchar();
     
     // Aloca um array contíguo, representando a estrutura dinâmica de três dimensões que contém todos os animais. RETURN: Endereço na memória com espaço para todos os animais.   */
     zoo = calloc(qtd_setor * qtd_jaula * qtd_animal, sizeof(info_animal));
     conferirMalloc(zoo);
-    printf("Zoológico alocado com espaço para %d animais.\n\n", qtd_setor * qtd_jaula * qtd_animal);
+    printf("[-] Zoológico alocado com espaço para %d animais.\n\n", qtd_setor * qtd_jaula * qtd_animal);
     
     // Aloca um array bidimensional, representando os nomes de cada setor, em ordem.
     catalogo = malloc (qtd_setor * sizeof(char *));
@@ -132,7 +98,7 @@ void adicionarAnimal (info_animal **zoo, int qtd_setor, int qtd_jaula, int qtd_a
     int i_animal = 0;
     
     do {
-        printf("Informe o setor e a jaula do animal: ");
+        printf("[-] Informe o setor e a jaula do animal: ");
         scanf("%d %d", &i_setor, &i_jaula);
     
         if(i_setor > qtd_setor || i_jaula > qtd_jaula)
@@ -157,8 +123,7 @@ void adicionarAnimal (info_animal **zoo, int qtd_setor, int qtd_jaula, int qtd_a
     }
     
     idx += i_animal;
-    printf("[-] Pronto para inserir animal na %dº vaga da %dº Jaula do Setor %d (zoo[%d][%d][%d]).\n\n", i_animal+1, i_jaula+1, i_setor+1, i_setor, i_jaula, i_animal);
-    printf("\nInsira os dados do animal:\n");
+    printf("[-] Insira os dados do animal na %dº vaga da %dº Jaula do Setor %d (zoo[%d][%d][%d]).\n\n", i_animal+1, i_jaula+1, i_setor+1, i_setor, i_jaula, i_animal);
     
     setbuf(stdin, NULL);
     
@@ -219,7 +184,7 @@ void animalMaisPesado (info_animal **zoo, int qtd_setor, int qtd_jaula, int qtd_
     
     if((*zoo)[idx].peso == 0)
     {
-        printf("O setor informado está vazio.\n");
+        printf("[!] O setor informado está vazio.\n");
         return;
     }
     
@@ -230,6 +195,44 @@ void animalMaisPesado (info_animal **zoo, int qtd_setor, int qtd_jaula, int qtd_
             maior = (*zoo)[i_animal];
     }
     
-    printf("O animal mais pesado do Setor %d é o(a) %s (%0.2f kg).\n\n", i_setor + 1, maior.nome, maior.peso);
+    printf("[!] O animal mais pesado do Setor %d é o(a) %s (%0.2f kg).\n\n", i_setor + 1, maior.nome, maior.peso);
+    return;
+}
+
+
+/*  BRIEF: Preenche o catálogo a partir do último nome vazio.  
+    PARAMS: Endereço do ponteiro que aponta para o primeiro nome do catálogo, quantidade de setores do zoológico. 
+    RETURN: Nada.   */
+void editarCatalogo (char** catalogo, int qtd_setor)
+{
+    int escolha;
+    int aux = strlen (catalogo[qtd_setor - 1]);
+    
+    printf("1. Adicionar nome ao catálogo.\n");
+    printf("2. Voltar.\n-> ");
+    scanf("%d", &escolha);
+    
+    if(escolha == 2)
+        return;
+    
+    // Preencher catálogo
+    if(aux > 0)
+        printf("[!] Todos os setores estão preenchidos, você não pode adicionar mais nenhum.\n");
+    else {
+        for (int i = 0; i < qtd_setor; i++)
+        {
+            aux = strlen (catalogo[i]);
+            if(aux == 0)
+            {
+                printf("\n[-] Renomear Setor %d: ", i+1);
+                setbuf(stdin, NULL);
+                fgets(catalogo[i], 256, stdin);
+                catalogo[i][strcspn(catalogo[i], "\n")] = 0;    // Remove '\n' do final da string. 
+                printf("[!] Setor %d nomeado como \"%s\".\n", i+1, catalogo[i]);
+            } else {
+                continue;
+            }
+        }
+    }
     return;
 }
