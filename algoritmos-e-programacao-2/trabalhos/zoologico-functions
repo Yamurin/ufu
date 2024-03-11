@@ -17,6 +17,7 @@ typedef struct {
 info_animal* iniciarZoo (int qtd_setor, int qtd_jaula, int qtd_animal);
 void adicionarAnimal (info_animal **zoo, int qtd_setor, int qtd_jaula, int qtd_animal);
 void animalMaisPesado (info_animal **zoo, int qtd_setor, int qtd_jaula, int qtd_animal);
+void editarCatalogo (char** catalogo, int qtd_setor);
 
 int printMenu ()
 {
@@ -30,9 +31,39 @@ int printMenu ()
     return i;
 }
 
-void preencherCatalogo (char** catalogo)
+// Preenche o catálogo a partir do último nome vazio
+void editarCatalogo (char** catalogo, int qtd_setor)
 {
+    int escolha;
+    int aux = strlen (catalogo[qtd_setor - 1]);
     
+    printf("1. Adicionar nome ao catálogo.\n");
+    printf("2. Voltar.\n");
+    scanf("%d", &escolha);
+    
+    if(escolha == 2)
+        return;
+    
+    // Preencher catálogo
+    if(aux > 0)
+        printf("Todos os setores estão preenchidos, você não pode adicionar mais nenhum.\n");
+    else {
+        for (int i = 0; i < qtd_setor; i++)
+        {
+            aux = strlen (catalogo[i]);
+            if(aux == 0)
+            {
+                printf("\n[!] Renomear Setor %d: ", i+1);
+                setbuf(stdin, NULL);
+                fgets(catalogo[i], 256, stdin);
+                catalogo[i][strcspn(catalogo[i], "\n")] = 0;    // Remove '\n' do final da string. 
+                printf("Setor %d nomeado como \"%s\"\n", i+1, catalogo[i]);
+            } else {
+                continue;
+            }
+        }
+    }
+    return;
 }
 
 // Assegurar que uma determinada alocação de memória foi bem sucedida.
@@ -64,14 +95,23 @@ int main ()
     
     printf("Aperte Enter para iniciar o sistema \n");
     getchar();
-    zoo = iniciarZoo (qtd_setor, qtd_jaula, qtd_animal);
     
-    // Declara vetor com os nomes dos setores
+    // Aloca um array contíguo, representando a estrutura dinâmica de três dimensões que contém todos os animais. RETURN: Endereço na memória com espaço para todos os animais.   */
+    zoo = calloc(qtd_setor * qtd_jaula * qtd_animal, sizeof(info_animal));
+    conferirMalloc(zoo);
+    printf("Zoológico alocado com espaço para %d animais.\n\n", qtd_setor * qtd_jaula * qtd_animal);
+    
+    // Aloca um array bidimensional, representando os nomes de cada setor, em ordem.
     catalogo = malloc (qtd_setor * sizeof(char *));
     conferirMalloc(catalogo);
-    
+        for (int i = 0; i < qtd_setor; i++)
+            catalogo[i] = malloc(TAM_STRING);
+
     switch (printMenu())
     {
+        case 1:
+            editarCatalogo (catalogo, qtd_setor);
+            break;
         case 2:
             adicionarAnimal (&zoo, qtd_setor, qtd_jaula, qtd_animal);
             break;
@@ -81,18 +121,6 @@ int main ()
             break;
     }
     return 0;   
-}
-
-/*  BRIEF: Aloca um array contíguo, representando a estrutura dinâmica de três dimensões que contém todos os animais.
-    PARAMS: Número de setores, jaulas e animais inseridaos pelo usuário.
-    RETURN: Endereço na memória com espaço para todos os animais.   */
-info_animal* iniciarZoo (int qtd_setor, int qtd_jaula, int qtd_animal)
-{
-    info_animal* zoo;
-    zoo = calloc(qtd_setor * qtd_jaula * qtd_animal, sizeof(info_animal));
-    conferirMalloc(zoo);
-    printf("Zoológico alocado com espaço para %d animais.\n\n", qtd_setor * qtd_jaula * qtd_animal);
-    return zoo;
 }
 
 /*  BRIEF: Preenche os dados da struct que representa o animal na primeira posição vazia da jaula indicada, somente se a jaula tiver um espaço vago. 
