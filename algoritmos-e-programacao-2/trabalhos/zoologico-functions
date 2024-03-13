@@ -28,6 +28,8 @@ int printMenu ()
     printf("2. Inserir animais em uma jaula de um setor. \n");
     printf("3. Procurar animal mais pesado de um dado setor. \n");
     printf("4. Inserir um novo setor. \n");
+    printf("5. Remover um setor\n");
+    printf("6. enderçeo de setores\n");
 
     int i;
     printf("-> ");
@@ -77,17 +79,18 @@ int main ()
     for (int i = 0; i < qtd_setor; i++)
         catalogo[i] = calloc(TAM_STRING + 1, sizeof(char));
 
-    ///////// BLOCO PARA TESTE ////////////////////////////////////////////////
+    /*///////// BLOCO PARA TESTE ////////////////////////////////////////////////
     strcpy(catalogo[0], "mamiferos");
     strcpy(catalogo[1], "repteis");
     strcpy(catalogo[2], "aveis");
     strcpy(catalogo[3], "peixes");
 
-   //////////////////////////////////////////////////////////////////////////
+   //////////////////////////////////////////////////////////////////////////*/
 
     while(1)
     {
-        int size;
+        int size, i_setor, tamSetor;
+        size = qtd_setor * qtd_jaula * qtd_animal * sizeof(info_animal);
         switch (printMenu())
         {
             case 1:
@@ -103,10 +106,9 @@ int main ()
 
             case 4:
                 //adicionarSetor (zoo, &catalogo, qtd_jaula, qtd_animal, &qtd_setor);
-                size = qtd_setor * qtd_jaula * qtd_animal * sizeof(info_animal);
                 zoo = realloc(zoo, size + qtd_jaula * qtd_animal * sizeof(info_animal));
                 conferirMalloc(zoo);
-                
+
                 printf("Mais um setor no zoológico foi alocado com espaço para %d animais.\n", qtd_animal);
 
                 size = qtd_setor * sizeof(char *);
@@ -120,9 +122,40 @@ int main ()
                 fgets(catalogo[qtd_setor], TAM_STRING, stdin);
                 catalogo[qtd_setor][strcspn(catalogo[qtd_setor], "\n")] = 0;     // Remove '\n' do final da string.
                 qtd_setor++;
-                
+
                 break;
+
+            case 5:
+                // remover setor n
+                // free setor  n
+                // reorderna
+                // realloc setor ( tam(setor) - 1 setor)
+                // mesma coisa com catalogo
+                 i_setor = 0;    // ìndice do primeiro elemento do setor a ser substituído
+                tamSetor = qtd_animal * qtd_jaula; // Quantidade de animais por setor
+
+                printf("Número do setor a ser removido: ");
+                scanf("%d", &i_setor);
+
+                i_setor = (i_setor - 1) * tamSetor;
+                    // I VAI DO COMEÇO AO FIM DO SETOR
+                for(int i  = i_setor; i < i_setor + tamSetor; i++)
+                {
+                    zoo[i] = zoo[i + tamSetor];
+                    realloc(zoo, size - (tamSetor * sizeof(info_animal)) );
+                }
+                    qtd_setor--;
+                break;
+            case 6:
+                for(int i = 0; i < qtd_setor; i++)
+                {
+                    printf("&setor [%d]: %p\n", i, &catalogo[i]);
+                    for(int j = 0; j < 3; j++)
+                        printf("%s \t", zoo[j].codigo);
+                    printf("\n\n");
+                }
         }
+
     }
     return 0;
 }
@@ -156,6 +189,7 @@ void adicionarAnimal (info_animal **zoo, int qtd_setor, int qtd_jaula, int qtd_a
         if(i_animal == qtd_animal)
         {
             printf("[!] Esta jaula já está com a sua capacidade máxima de animais.\n");
+            break;
             return;
         }
     }
@@ -170,7 +204,7 @@ void adicionarAnimal (info_animal **zoo, int qtd_setor, int qtd_jaula, int qtd_a
     conferirMalloc((*zoo)[idx].codigo);
     fgets((*zoo)[idx].codigo, TAM_STRING, stdin);
 
-    setbuf(stdin, NULL);
+   /* setbuf(stdin, NULL);
 
     printf("Nome: ");
     (*zoo)[idx].nome = malloc(TAM_STRING);
@@ -194,7 +228,7 @@ void adicionarAnimal (info_animal **zoo, int qtd_setor, int qtd_jaula, int qtd_a
     do {
         setbuf(stdin, NULL);
         scanf("%f", &((*zoo)[idx].altura));
-    } while ((*zoo)[idx].altura <= 0);
+    } while ((*zoo)[idx].altura <= 0);*/
 
     printf("\n[!] %s adicionado(a) com sucesso.\n", (*zoo)[idx].nome);
     return;
