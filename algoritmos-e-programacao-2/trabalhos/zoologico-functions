@@ -87,6 +87,7 @@ int main ()
 
     while(1)
     {
+        int size;
         switch (printMenu())
         {
             case 1:
@@ -101,9 +102,18 @@ int main ()
                 break;
 
             case 4:
-                adicionarSetor (zoo, catalogo, qtd_jaula, qtd_animal, &qtd_setor);
+                //adicionarSetor (zoo, &catalogo, qtd_jaula, qtd_animal, &qtd_setor);
+                size = qtd_setor * qtd_jaula * qtd_animal * sizeof(info_animal);
+                zoo = realloc(zoo, size + qtd_jaula * qtd_animal * sizeof(info_animal));
+                conferirMalloc(zoo);
+
+                size = qtd_setor * sizeof(char *);
+                catalogo = realloc(catalogo, size + sizeof(char*));
+                catalogo[qtd_setor] = malloc(TAM_STRING);
+                strcpy(catalogo[qtd_setor], "sem nome");
+
+                qtd_setor++;
                 printf("Nova qtd de setores; %d\n", qtd_setor);
-                printf("sizeof zoo: %llu\n", sizeof(zoo));
                 break;
         }
     }
@@ -297,20 +307,27 @@ void editarCatalogo (char*** catalogo, int qtd_setor)
     return;
 }
 
-info_animal* adicionarSetor (info_animal** zoo, char*** catalogo, int qtd_jaula, int qtd_animal, int* qtd_setor)
+/*info_animal* adicionarSetor (info_animal** zoo, char*** catalogo, int qtd_jaula, int qtd_animal, int* qtd_setor)
 {
     info_animal *novoZoo;
-    novoZoo = realloc(zoo, sizeof(zoo) + (qtd_jaula * qtd_animal));
+
+    int tamMemoria = *qtd_setor * qtd_jaula * qtd_animal * sizeof(info_animal);           // Quantidade de memória previamente alocada
+    tamMemoria += qtd_jaula * qtd_animal * sizeof(info_animal);     // Quantidade de memória a ser alocada com um novo setor
+    novoZoo = realloc(zoo, tamMemoria);
     conferirMalloc(novoZoo);
 
     printf("O zoológico ganhou mais um setor com espaço para %d novos animais.\n", qtd_jaula * qtd_animal);
-    *qtd_setor += 1;
 
+   /* tamMemoria = *qtd_setor * sizeof(char *);       // Quantidade de memória previamente alocada para o vetor de nomes de setores
+    tamMemoria += TAM_STRING * sizeof (char *);                   // Quantidade de memória a ser alocada para mais um nome de um setor
+    *catalogo = realloc(*catalogo, tamMemoria);
+    conferirMalloc(catalogo);
+
+    printf("O catálogo foi atualizado;\n");
     printf("Dê um nome para o novo setor: ");
     setbuf(stdin, NULL);
-    strcpy((*catalogo)[*qtd_setor - 1], "novo setor");
-    //fgets((*catalogo)[*qtd_setor - 1], TAM_STRING, stdin);
+    fgets((*catalogo)[*qtd_setor], TAM_STRING, stdin);
 
-    // ERRO: TEM QUE REALOCAR O CATALOGO
+    *qtd_setor += 1;
     return novoZoo;
-}
+}*/
