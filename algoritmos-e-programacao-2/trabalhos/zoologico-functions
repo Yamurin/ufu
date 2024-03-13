@@ -150,8 +150,7 @@ int main ()
                 for(int i = 0; i < qtd_setor; i++)
                 {
                     printf("&setor [%d]: %p\n", i, &catalogo[i]);
-                    for(int j = 0; j < 3; j++)
-                        printf("%s \t", zoo[j].codigo);
+                    printf("%s \t", zoo[i].codigo);
                     printf("\n\n");
                 }
         }
@@ -189,7 +188,6 @@ void adicionarAnimal (info_animal **zoo, int qtd_setor, int qtd_jaula, int qtd_a
         if(i_animal == qtd_animal)
         {
             printf("[!] Esta jaula já está com a sua capacidade máxima de animais.\n");
-            break;
             return;
         }
     }
