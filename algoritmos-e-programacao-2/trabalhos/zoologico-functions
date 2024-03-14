@@ -115,8 +115,8 @@ int main ()
 
         case 4:
 
-            zoo = alterarSetor (&zoo, qtd_setor, qtd_jaula, qtd_animal, 1, 'a');
-            catalogo = alterarCatalogo(&catalogo, qtd_setor, 1, 'a');
+            zoo = alterarSetor (&zoo, qtd_setor, qtd_jaula, qtd_animal, 'a', 0);
+            catalogo = alterarCatalogo(&catalogo, qtd_setor, 'a', i_setor);
             qtd_setor++;
             break;
 
@@ -369,20 +369,20 @@ void editarNomesCatalogo (char*** catalogo, int qtd_setor)
 info_animal* alterarSetor(info_animal** zoo, int qtd_setor, int qtd_jaula, int qtd_animal, char c, int i_setor)
 {
     info_animal* novo_zoo;
+    novo_zoo = *zoo;
 
-    int tam_zoo = qtd_setor * qtd_jaula * qtd_animal * sizeof(info_animal);
-    int tam_setor = qtd_jaula * qtd_animal * sizeof(info_animal);
+    int tam_zoo = qtd_setor * qtd_jaula * qtd_animal;
+    int tam_setor = qtd_jaula * qtd_animal;
 
     // Remover setor e reordenar estrutura do zoológico.
     if(c == 'r')
     {
         i_setor = (i_setor - 1) * tam_setor;
 
-        for (int i  = i_setor; i < i_setor + tam_setor; i++)
+        for (int i  = i_setor; i < tam_zoo; i++)
         {
-            novo_zoo = *zoo;
             novo_zoo[i] = novo_zoo[i + tam_setor];
-            realloc(*zoo, tam_zoo - tam_setor);
+            novo_zoo = realloc(*zoo, (tam_zoo - tam_setor) * sizeof(info_animal));
             conferirMalloc(novo_zoo);
         }
         printf("O Setor %d foi removido do zoológico.\n", i_setor);
@@ -391,7 +391,7 @@ info_animal* alterarSetor(info_animal** zoo, int qtd_setor, int qtd_jaula, int q
     // Adicionar setor .
     else if(c == 'a')
     {
-        novo_zoo = realloc(*zoo, tam_zoo + tam_setor);
+        novo_zoo = realloc(*zoo, (tam_zoo + tam_setor) * sizeof(info_animal));
         conferirMalloc(novo_zoo);
 
         printf("Mais um setor no zoológico foi alocado com espaço para %d animais.\n", qtd_animal);
@@ -408,10 +408,9 @@ char** alterarCatalogo(char*** catalogo, int qtd_setor, char c, int i_setor)
     // Remover nome do catálogo e reodernar.
     if(c == 'r')
     {
-        for (int i = i_setor - 1; i < qtd_setor - 1; i++)
+        for (int i = i_setor - 1; i < qtd_setor - 2; i++)
             strcpy(novo_catalogo[i], novo_catalogo[i + 1]);
-        free (novo_catalogo[qtd_setor - 1]);
-
+        novo_catalogo = realloc (novo_catalogo, tam_catalogo - sizeof(char *));
         return novo_catalogo;
     }
     // Adicionar espaço para mais um nome no catálogo.
@@ -428,4 +427,3 @@ char** alterarCatalogo(char*** catalogo, int qtd_setor, char c, int i_setor)
         return novo_catalogo;
     }
 }
-
