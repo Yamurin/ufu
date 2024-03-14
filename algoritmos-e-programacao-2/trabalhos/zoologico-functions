@@ -75,8 +75,7 @@ int main ()
     } while (tam_zoo <= 0 || tam_setor <= 0);
 
 
-    printf("[-] Aperte Enter para iniciar o sistema \n");
-    getchar();
+    continuar();
 
     // Aloca um array contíguo, representando a estrutura dinâmica de três dimensões que contém todos os animais.
     zoo = calloc(qtd_setor * qtd_jaula * qtd_animal, sizeof(info_animal));
@@ -106,6 +105,7 @@ int main ()
     {
         case 1:
             editarNomesCatalogo (&catalogo, qtd_setor);
+            continuar();
             break;
 
         case 2:
@@ -124,7 +124,7 @@ int main ()
             break;
 
         case 5:
-            printf("Número do setor a ser removido: ");
+            printf("Insira o número do setor a ser removido: ");
             scanf("%d", &i_setor);
 
             zoo = alterarSetor (&zoo, qtd_setor, qtd_jaula, qtd_animal, 'r', i_setor);
@@ -185,13 +185,14 @@ void adicionarAnimal (info_animal **zoo, int qtd_setor, int qtd_jaula, int qtd_a
     int i_jaula, i_setor, idx;
     int i_animal = 0;
 
+    printf("\t-  Adicionar novo animal  -\t\n\n");
     do {
-        printf("[>] Informe o setor e a jaula do animal: ");
+        printf("[>] Informe o número do setor e o número da jaula do animal: ");
         scanf("%d %d", &i_setor, &i_jaula);
 
-        if(i_setor > qtd_setor || i_jaula > qtd_jaula)
+        if(i_setor <= 0 || i_jaula <= 0)
             printf("[!] Você está tentando acessar uma jaula e/ou setor que não existe!\n\n");
-    } while (i_setor > qtd_setor || i_jaula > qtd_jaula);
+    } while ((i_setor <= 0 || i_jaula <= 0);
 
     i_jaula -= 1;
     i_setor -= 1;
@@ -314,10 +315,14 @@ void editarNomesCatalogo (char*** catalogo, int qtd_setor)
     int escolha;
     int nomeTam = strlen ((*catalogo)[qtd_setor - 1]);     // Variável auxiliar para conferir se o último nome de setor está vazio
 
-    printf("1. Adicionar nomes ao catálogo.\n");
-    printf("2. Visualizar catálogo de nomes.\n");
+    printf("\t-  Catálogo de Setores  -\t\n\n");
+    printf("1. Adicionar nomes à todos os setores sem nome.\n");
+    printf("2. Visualizar nomes no Catálogo.\n");
     printf("3. Voltar.\n-> ");
+
     scanf("%d", &escolha);
+
+    printf("\n");
 
     if(escolha == 3)
         return;
@@ -326,10 +331,10 @@ void editarNomesCatalogo (char*** catalogo, int qtd_setor)
     {
         for (int i = 0; i < qtd_setor; i++)
         {
-            printf("Setor %d: ", i + 1);
+            printf("Setor %d:  ", i + 1);
             nomeTam = strlen ((*catalogo)[i]);
             if(nomeTam == 0)
-                printf("Não nomeado\n");
+                printf("(Sem nome)\n");
             else
                 printf("%s\n", (*catalogo)[i]);
         }
@@ -339,7 +344,7 @@ void editarNomesCatalogo (char*** catalogo, int qtd_setor)
 
     // Preencher catálogo, a partir do primeiro elemento vazio
     if(nomeTam > 0)
-        printf("[!] Todos os setores estão preenchidos, você não pode adicionar mais nenhum nnehum.\n");
+        printf("[!] Todos os setores estão preenchidos, você não pode adicionar mais nenhum.\n");
     else {
         for (int i = 0; i < qtd_setor; i++)
         {
@@ -383,7 +388,7 @@ info_animal* alterarSetor(info_animal** zoo, int qtd_setor, int qtd_jaula, int q
             novo_zoo = realloc(*zoo, (tam_zoo - tam_setor) * sizeof(info_animal));
             conferirMalloc(novo_zoo);
         }
-        printf("O Setor %d foi removido do zoológico.\n", i_setor);
+
         return novo_zoo;
     }
     // Adicionar setor .
@@ -392,7 +397,6 @@ info_animal* alterarSetor(info_animal** zoo, int qtd_setor, int qtd_jaula, int q
         novo_zoo = realloc(*zoo, (tam_zoo + tam_setor) * sizeof(info_animal));
         conferirMalloc(novo_zoo);
 
-        printf("Mais um setor no zoológico foi alocado com espaço para %d animais.\n", qtd_animal);
         return novo_zoo;
     }
 }
@@ -409,6 +413,8 @@ char** alterarCatalogo(char*** catalogo, int qtd_setor, char c, int i_setor)
         for (int i = i_setor - 1; i < qtd_setor - 2; i++)
             strcpy(novo_catalogo[i], novo_catalogo[i + 1]);
         novo_catalogo = realloc (novo_catalogo, tam_catalogo - sizeof(char *));
+
+        printf("O Setor %d foi removido do Zoológico.\n", i_setor);
         return novo_catalogo;
     }
     // Adicionar espaço para mais um nome no catálogo.
@@ -418,10 +424,19 @@ char** alterarCatalogo(char*** catalogo, int qtd_setor, char c, int i_setor)
         conferirMalloc(novo_catalogo);
         novo_catalogo[qtd_setor] = malloc(TAM_STRING);
 
-        printf("Insira o título do novo setor: ");
+        printf("[-] Insira o título do novo setor: ");
         setbuf(stdin, NULL);
-        strcpy(novo_catalogo[qtd_setor], "novo setor");
+        fgets(novo_catalogo[qtd_setor], TAM_STRING, stdin);
+        printf("[>] Setor \"%s\" adicionado ao Zoológico.\n", novo_catalogo[qtd_setor]);
 
         return novo_catalogo;
     }
+}
+
+void continuar (void)
+{
+    printf("Aperte qualquer tecla para continuar...");
+    setbuf(stdin, NULL);
+    getchar();
+    system("@cls||clear");     // Limpar a tela do terminal.
 }
