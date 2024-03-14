@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h> // Biblioteca para impressão de caracteres do PT-BR
-#include <ctype.h>
 
 #define TAM_STRING 256
 
@@ -15,8 +14,6 @@ typedef struct {
 } info_animal;
 
 // Protótipos de funções.
-info_animal* adicionarSetor (info_animal** zoo, char*** catalogo, int qtd_jaula, int qtd_animal, int* qtd_setor);
-
 void adicionarAnimal  (info_animal **zoo, int qtd_setor, int qtd_jaula, int qtd_animal);
 void animalMaisPesado (info_animal **zoo, char** catalogo, int qtd_setor, int qtd_jaula, int qtd_animal);
 void editarCatalogo   (char*** catalogo, int qtd_setor);
@@ -29,7 +26,8 @@ int printMenu ()
     printf("3. Procurar animal mais pesado de um dado setor. \n");
     printf("4. Inserir um novo setor. \n");
     printf("5. Remover um setor\n");
-    printf("6. enderçeo de setores\n");
+    printf("6. Endereço de setores\n");
+    printf("7. Mostrar todod os animais do zoológico\n");
 
     int i;
     printf("-> ");
@@ -79,84 +77,118 @@ int main ()
     for (int i = 0; i < qtd_setor; i++)
         catalogo[i] = calloc(TAM_STRING + 1, sizeof(char));
 
-    /*///////// BLOCO PARA TESTE ////////////////////////////////////////////////
+    ///////// BLOCO PARA TESTE ////////////////////////////////////////////////
     strcpy(catalogo[0], "mamiferos");
     strcpy(catalogo[1], "repteis");
     strcpy(catalogo[2], "aveis");
     strcpy(catalogo[3], "peixes");
+    strcpy(catalogo[4], "anfibios");
+    strcpy(catalogo[5], "insetos");
 
-   //////////////////////////////////////////////////////////////////////////*/
+   //////////////////////////////////////////////////////////////////////////
 
-    while(1)
+    while(1) {
+    int i_setor, idx;
+    int tamSetor = qtd_jaula * qtd_animal;
+    int size = qtd_setor * qtd_jaula * qtd_animal * sizeof(info_animal);
+
+    switch (printMenu())
     {
-        int size, i_setor, tamSetor;
-        size = qtd_setor * qtd_jaula * qtd_animal * sizeof(info_animal);
-        switch (printMenu())
-        {
-            case 1:
-                editarCatalogo (&catalogo, qtd_setor);
-                break;
-            case 2:
-                adicionarAnimal (&zoo, qtd_setor, qtd_jaula, qtd_animal);
-                break;
+        case 1:
+            editarCatalogo (&catalogo, qtd_setor);
+            break;
+        case 2:
+            adicionarAnimal (&zoo, qtd_setor, qtd_jaula, qtd_animal);
+            break;
 
-            case 3:
-                animalMaisPesado (&zoo, catalogo, qtd_setor, qtd_jaula, qtd_animal);
-                break;
+        case 3:
+            animalMaisPesado (&zoo, catalogo, qtd_setor, qtd_jaula, qtd_animal);
+            break;
 
-            case 4:
-                //adicionarSetor (zoo, &catalogo, qtd_jaula, qtd_animal, &qtd_setor);
-                zoo = realloc(zoo, size + qtd_jaula * qtd_animal * sizeof(info_animal));
-                conferirMalloc(zoo);
+        case 4:
+            //adicionarSetor (zoo, &catalogo, qtd_jaula, qtd_animal, &qtd_setor);
+            zoo = realloc(zoo, size + qtd_jaula * qtd_animal * sizeof(info_animal));
+            conferirMalloc(zoo);
 
-                printf("Mais um setor no zoológico foi alocado com espaço para %d animais.\n", qtd_animal);
+            printf("Mais um setor no zoológico foi alocado com espaço para %d animais.\n", qtd_animal);
 
-                size = qtd_setor * sizeof(char *);
-                catalogo = realloc(catalogo, size + sizeof(char*));
-                conferirMalloc(catalogo);
+            size = qtd_setor * sizeof(char *);
+            catalogo = realloc(catalogo, size + sizeof(char*));
+            conferirMalloc(catalogo);
 
-                catalogo[qtd_setor] = malloc(TAM_STRING);
-                printf("Insira o nome do novo setor: ");
+            catalogo[qtd_setor] = malloc(TAM_STRING);
+            printf("Insira o nome do novo setor: ");
 
-                setbuf(stdin, NULL);
-                fgets(catalogo[qtd_setor], TAM_STRING, stdin);
-                catalogo[qtd_setor][strcspn(catalogo[qtd_setor], "\n")] = 0;     // Remove '\n' do final da string.
-                qtd_setor++;
+            setbuf(stdin, NULL);
+            fgets(catalogo[qtd_setor], TAM_STRING, stdin);
+            catalogo[qtd_setor][strcspn(catalogo[qtd_setor], "\n")] = 0;     // Remove '\n' do final da string.
+            qtd_setor++;
 
-                break;
+            break;
 
-            case 5:
-                // remover setor n
-                // free setor  n
-                // reorderna
-                // realloc setor ( tam(setor) - 1 setor)
-                // mesma coisa com catalogo
-                 i_setor = 0;    // ìndice do primeiro elemento do setor a ser substituído
-                tamSetor = qtd_animal * qtd_jaula; // Quantidade de animais por setor
+        case 5:
+            i_setor = 0;    // ìndice do primeiro elemento do setor a ser substituído
+            setbuf(stdout, NULL);
+            printf("Número do setor a ser removido: ");
+            scanf("%d", &i_setor);
 
-                printf("Número do setor a ser removido: ");
-                scanf("%d", &i_setor);
+            for (int i = i_setor - 1; i < qtd_setor - 1; i++)
+                strcpy(catalogo[i], catalogo[i + 1]);
+            free (catalogo[qtd_setor - 1]);
 
-                i_setor = (i_setor - 1) * tamSetor;
-                    // I VAI DO COMEÇO AO FIM DO SETOR
-                for(int i  = i_setor; i < i_setor + tamSetor; i++)
+            i_setor = (i_setor - 1) * tamSetor;
+            for (int i  = i_setor; i < i_setor + tamSetor; i++)
+            {
+                zoo[i] = zoo[i + tamSetor];
+                realloc(zoo, size - (tamSetor * sizeof(info_animal)) );
+            }
+
+            qtd_setor--;
+
+            break;
+
+        case 6:
+            // Reordena a ordem do setor
+            for (int i = 0; i < qtd_setor; i++)
+            {
+                printf("&setor [%d]: %p\n", i, &zoo[i + tamSetor]);
+                printf("%s \t", catalogo[i]);
+                printf("\n\n");
+            }
+
+            break;
+
+        case 7:
+            // imprimir todos os animais do zoológico
+            setbuf(stdout, NULL);
+            for (i_setor = 0; i_setor < qtd_setor; i_setor++)
+            {
+                printf("------------------------------------------------------\n");
+                printf("SETOR %d: \"%s\" \n", i_setor + 1, catalogo[i_setor]);
+                printf("Este setor tem espaço para mais x animais.\n");
+                for (int i_jaula = 0; i_jaula < qtd_jaula; i_jaula++)
                 {
-                    zoo[i] = zoo[i + tamSetor];
-                    realloc(zoo, size - (tamSetor * sizeof(info_animal)) );
+                    printf("[!] Ficha técnica dos Animais na %dº jaula: \n", i_jaula + 1);
+                    if(zoo[idx].codigo == NULL)
+                    {
+                        idx = (i_setor * qtd_jaula * qtd_animal + i_jaula * qtd_jaula);
+                        printf("A jaula está vazia.\n");
+                        break;
+                    }
+                    for (int i_animal = 0; i_animal < qtd_animal; i_animal++)
+                    {
+                        idx += i_animal;
+
+                        if(zoo[idx].codigo != NULL)
+                            printf("%s (Cód.: %s): \t %s  -  %.2f quilos -  %.2f metros\n", zoo[idx].nome, zoo[idx].codigo, zoo[idx].especie, zoo[idx].peso, zoo[idx].altura);
+                    }
+                    printf("\n");
                 }
-                    qtd_setor--;
-                break;
-            case 6:
-                for(int i = 0; i < qtd_setor; i++)
-                {
-                    printf("&setor [%d]: %p\n", i, &catalogo[i]);
-                    printf("%s \t", zoo[i].codigo);
-                    printf("\n\n");
-                }
-        }
+            }
+    }
 
     }
-    return 0;
+return 0;
 }
 
 /*  BRIEF: Preenche os dados da struct que representa o animal na primeira posição vazia da jaula indicada, somente se a jaula tiver um espaço vago.
@@ -202,31 +234,31 @@ void adicionarAnimal (info_animal **zoo, int qtd_setor, int qtd_jaula, int qtd_a
     conferirMalloc((*zoo)[idx].codigo);
     fgets((*zoo)[idx].codigo, TAM_STRING, stdin);
 
-   /* setbuf(stdin, NULL);
+    setbuf(stdin, NULL);
 
-    printf("Nome: ");
-    (*zoo)[idx].nome = malloc(TAM_STRING);
-    conferirMalloc((*zoo)[idx].nome);
-    fgets((*zoo)[idx].nome, TAM_STRING, stdin);
+     printf("Nome: ");
+     (*zoo)[idx].nome = malloc(TAM_STRING);
+     conferirMalloc((*zoo)[idx].nome);
+     fgets((*zoo)[idx].nome, TAM_STRING, stdin);
 
-   setbuf(stdin, NULL);
+    setbuf(stdin, NULL);
 
-    printf("Espécie: ");
-    (*zoo)[idx].especie = malloc(TAM_STRING);
-    conferirMalloc((*zoo)[idx].especie);
-    fgets((*zoo)[idx].especie, TAM_STRING, stdin);
+     printf("Espécie: ");
+     (*zoo)[idx].especie = malloc(TAM_STRING);
+     conferirMalloc((*zoo)[idx].especie);
+     fgets((*zoo)[idx].especie, TAM_STRING, stdin);
 
-    printf("Peso (maior que 0kg): ");
-    do {
-        setbuf(stdin, NULL);
-        scanf("%f", &((*zoo)[idx].peso));
-    } while ((*zoo)[idx].peso <= 0);
+     printf("Peso (maior que 0kg): ");
+     do {
+         setbuf(stdin, NULL);
+         scanf("%f", &((*zoo)[idx].peso));
+     } while ((*zoo)[idx].peso <= 0);
 
-    printf("Altura (maior que 0m): ");
-    do {
-        setbuf(stdin, NULL);
-        scanf("%f", &((*zoo)[idx].altura));
-    } while ((*zoo)[idx].altura <= 0);*/
+     printf("Altura (maior que 0m): ");
+     do {
+         setbuf(stdin, NULL);
+         scanf("%f", &((*zoo)[idx].altura));
+     } while ((*zoo)[idx].altura <= 0);
 
     printf("\n[!] %s adicionado(a) com sucesso.\n", (*zoo)[idx].nome);
     return;
@@ -345,5 +377,4 @@ void editarCatalogo (char*** catalogo, int qtd_setor)
     printf("\n");
     return;
 }
-
 
