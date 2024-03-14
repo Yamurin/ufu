@@ -258,10 +258,9 @@ void adicionarAnimal (info_animal **zoo, int qtd_setor, int qtd_jaula, int qtd_a
 void animalMaisPesado (info_animal **zoo, char **catalogo, int qtd_setor, int tam_setor, int tam_zoo)
 {
     int i_setor = 0;    // Setor correspondente ao valor pesquisado
-    int i;        // Variável genérica para armazenar um index
-    char pesquisa[TAM_STRING];
     double pesadoPeso = 0;
     char pesadoNome[TAM_STRING];
+    char pesquisa[TAM_STRING];
 
     printf("Insira o nome do setor onde pesquisar qual o animal mais pesado (Exatamente igual): ");
     setbuf(stdin, NULL);
@@ -269,32 +268,26 @@ void animalMaisPesado (info_animal **zoo, char **catalogo, int qtd_setor, int ta
     pesquisa[strcspn(pesquisa, "\n")] = 0;     // Remove '\n' do final da string.
 
     // Parsing do nome digitado pelo usuário com o index correspondente
-    for (i = 0; i < qtd_setor; i++)
-    {
-        if( strcmp(pesquisa, catalogo[i]) == 0 )            // Strcmp retorna "true" (0) se verdadeiro
-        {
-            i_setor = i;
-            break;
-        }
-    }
+    while(strcmp(pesquisa, catalogo[i_setor]) != 0 )
+        i_setor++;
 
-    if(i == qtd_setor)
+    if(i_setor == qtd_setor)
     {
         printf("[!] O nome inserido não foi encontrado no Catálogo de Setores.\n");
         return;
     }
 
     // Aritmética para o primeiro elemento do setor informado (na primeira jaula)
-    i = i_setor * tam_setor;
+    i_setor *= tam_setor;
 
-    if((*zoo)[i].peso == 0)
+    if((*zoo)[i_setor].peso == 0)
     {
-        printf("[!] O setor informado está vazio.\n");
+        printf("[!] O setor \"%s\" está vazio.\n", pesquisa);
         return;
     }
 
     // Percorre todos os animais de toda a extensão do setor para encontrar o mais pesado deles.
-    for (int i_animal = i; i_animal < (i + tam_setor); i_animal++)
+    for (int i_animal = i_setor; i_animal < (i_setor + tam_setor); i_animal++)
     {
         if((*zoo)[i_animal].peso > pesadoPeso)
         {
@@ -303,10 +296,9 @@ void animalMaisPesado (info_animal **zoo, char **catalogo, int qtd_setor, int ta
         }
     }
 
-    printf("[>] O animal mais pesado do Setor %d é o(a) %s (%0.2f kg).\n\n", i_setor + 1,  pesadoNome, pesadoPeso);
+    printf("[>] O animal mais pesado do Setor \"%s\" é o(a) %s (%0.2f kg).\n\n", pesquisa, pesadoNome, pesadoPeso);
     return;
 }
-
 
 /*  BRIEF: Preenche o catálogo a partir do último nome vazio.
     PARAMS: Endereço do catálogo, quantidade de setores do zoológico.
