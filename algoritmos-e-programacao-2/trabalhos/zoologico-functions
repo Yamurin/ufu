@@ -13,13 +13,14 @@ typedef struct {
     float altura;
 } info_animal;
 
-// Protótipos de funções.
-void editarNomesCatalogo   (char*** catalogo,  int qtd_setor);
+/* PROTÓTIPOS DE FUNÇÕES */
+void
+editarNomesCatalogo        (char*** catalogo,  int qtd_setor);
 char** alterarCatalogo     (char*** catalogo,  int qtd_setor, char c, int i_setor);
 info_animal* alterarSetor  (info_animal** zoo, int tam_zoo, int tam_setor, char c, int i_setor);
 
 void adicionarAnimal       (info_animal** zoo, int qtd_jaula, int qtd_animal);
-void animalMaisPesado      (info_animal** zoo, char** catalogo, int qtd_setor, int tam_setor, int tam_zoo);
+void animalMaisPesado      (info_animal** zoo, char** catalogo, int qtd_setor, int tam_setor);
 
 void printZoo              (info_animal* zoo,  char** catalogo, int qtd_setor, int qtd_jaula, int qtd_animal);
 int  printMenu             (void);
@@ -29,6 +30,7 @@ void continuar             (void);
 
 int main ()
 {
+    setbuf(stdout, NULL);
     setlocale (LC_ALL, "Portuguese");
 
     info_animal* zoo;
@@ -37,6 +39,10 @@ int main ()
     int tam_setor, tam_zoo;
     int i_setor;
 
+    printf("Bem-vindo(a) ao Administrador de Zoológicos v1.0!\n Disciplina: Algoritmos e Programação II \t Discente: Rayane Reis Mota - 12311BSI233\n");
+    printf("\t----------------------------------------------------------------------\t\n\n");
+
+    // Coletar as dimensões do Zoológico.
     do {
         printf("[-] Insira o número de setores, de jaulas e de animais para começar:\n");
         scanf ("%d %d %d", &qtd_setor, &qtd_jaula, &qtd_animal);
@@ -62,21 +68,19 @@ int main ()
         catalogo[i] = calloc (TAM_STRING + 1, sizeof (char));
 
     while(1) {
+        setbuf(stdout, NULL);
     switch (printMenu ())
     {
         case 1:
             editarNomesCatalogo(&catalogo, qtd_setor);
-            continuar ();
             break;
 
         case 2:
             adicionarAnimal(&zoo, qtd_jaula, qtd_animal);
-            continuar ();
             break;
 
         case 3:
-            animalMaisPesado(&zoo, catalogo, qtd_setor, tam_setor, tam_zoo);
-            continuar ();
+            animalMaisPesado(&zoo, catalogo, qtd_setor, tam_setor);
             break;
 
         case 4:
@@ -84,23 +88,30 @@ int main ()
             catalogo = alterarCatalogo(&catalogo, qtd_setor, 'a', i_setor);
 
             qtd_setor++;
-            continuar ();
             break;
 
         case 5:
-            printf("Insira o número do setor a ser removido: ");
-            scanf("%d", &i_setor);
+            if (qtd_setor == 1)
+            {
+                printf("[!] Você não pode remover o único setor do Zoológico.\n");
+                break;
+            }
+
+            do
+            {
+                printf("Insira o número do setor a ser removido: ");
+                scanf("%d", &i_setor);
+            } while (i_setor > qtd_setor || i_setor < 0);
+
 
             zoo      = alterarSetor(&zoo, tam_zoo, tam_setor, 'r', i_setor);
             catalogo = alterarCatalogo(&catalogo, qtd_setor, 'r', i_setor);
 
             qtd_setor--;
-            continuar ();
             break;
 
         case 6:
             printZoo(zoo, catalogo, qtd_setor, qtd_jaula, qtd_animal);
-            continuar ();
             break;
 
         case 7:
@@ -113,14 +124,18 @@ int main ()
             free(catalogo);
 
             exit(0);
-    } }
-return 0;
+    } continuar(); }
+
 }
 
-// Percorre todo o vetor zoo[], imprime cada animal na tela.
+/*
+ * IMPRIMIR TODOS OS ANIMAIS DO ZOOLÓGICO.
+ *      Acessa cada struct (animal) dentro do vetor zoo[], e imprime na tela seus respectivos dados.
+ *      Parâmetros: Vetor com todos os animais, vetor com todos os nomes dos setores, dimensões do zoológico.
+ * */
 void printZoo (info_animal* zoo, char** catalogo, int qtd_setor, int qtd_jaula, int qtd_animal)
 {
-    int idx;        // Index para acessar cada animal no vetor por meio de aritmética.
+    int idx;
     for (int i_setor = 0; i_setor < qtd_setor; i_setor++)
     {
         printf("\t SETOR %d: ", i_setor + 1);
@@ -133,7 +148,7 @@ void printZoo (info_animal* zoo, char** catalogo, int qtd_setor, int qtd_jaula, 
 
         for (int i_jaula = 0; i_jaula < qtd_jaula; i_jaula++)
         {
-            idx = (i_setor * qtd_jaula * qtd_animal + i_jaula * qtd_jaula);
+            idx = (i_setor * qtd_jaula * qtd_animal + i_jaula * qtd_jaula);     // Aritmética do index para acessar cada elemento dentro do vetor.
             printf("[-] %dº jaula: \n", i_jaula + 1);
 
             if (zoo[idx].codigo == NULL)
@@ -156,13 +171,16 @@ void printZoo (info_animal* zoo, char** catalogo, int qtd_setor, int qtd_jaula, 
                 printf("\n");
             }
         }
-        printf("\n\n");
+        printf("\n");
     }
 }
-/*  BRIEF: Preenche os dados da struct que representa o animal na primeira posição vazia da jaula indicada, somente se a jaula tiver um espaço vago.
-    PARAMS: Endereço do ponteiro que aponta para o primeiro animal do zoológico.
-    RETURN: Nada.   */
-void adicionarAnimal (info_animal **zoo, int qtd_jaula, int qtd_animal) // TODO não pode pesquisar animal se os setores estão vazios
+
+/*
+ * ADICIONAR UM ANIMAL AO VETOR ZOO[].
+ *      Preenche os dados da struct (animal) na primeira posição vazia da jaula indicada, somente se a jaula tiver um espaço vago.
+ *      Parâmetros: Endereço do vetor com todos os animais, dimensões do zoológico.
+ * */
+void adicionarAnimal (info_animal **zoo, int qtd_jaula, int qtd_animal)
 {
     int i_setor, i_jaula, i_animal, idx;
 
@@ -176,14 +194,14 @@ void adicionarAnimal (info_animal **zoo, int qtd_jaula, int qtd_animal) // TODO 
             printf("[!] Você está tentando acessar uma jaula e/ou setor que não existe!\n\n");
         } while (i_setor <= 0 || i_jaula <= 0);
 
+    // Conversão da entrada humana em index para navegação no zoo[].
     i_animal = 0;
     i_jaula -= 1;
     i_setor -= 1;
 
-    // Artimética deindex
-    idx = i_setor * qtd_jaula * qtd_animal + i_jaula * qtd_jaula;
+    idx = i_setor * qtd_jaula * qtd_animal + i_jaula * qtd_jaula;       // Aritmética do index para acessar cada elemento dentro do vetor.
 
-    // Localiza o primeiro espaço vago para animal na jaula indicada.
+    // Localiza a primeira vaga não nula na jaula indicada.
     while ((*zoo)[idx + i_animal].codigo != NULL)
     {
         i_animal++;
@@ -235,25 +253,37 @@ void adicionarAnimal (info_animal **zoo, int qtd_jaula, int qtd_animal) // TODO 
     return;
 }
 
-/*  BRIEF: Encontra o animal mais pesado dentre todos os animais de todas as jaulas de um setor.
-    PARAMS: Zoológico, catálogo.
-    RETURN: Nada.   */
-void animalMaisPesado(info_animal **zoo, char **catalogo, int qtd_setor, int tam_setor, int tam_zoo)
+/*
+ * ENCONTRAR O ANIMAL MAIS PESADO EM UM SETOR ESCOLHIDO.
+ *      Coleta uma entrada em string e localiza o índice do primeiro setor de nome igual. Encontra o animal de maior peso no setor indicado.
+ *      Parâmetros: Endereço do vetor com todos os animais, vetor com todos os nomes dos setores, dimensões do zoológico.
+ * */
+void animalMaisPesado(info_animal **zoo, char **catalogo, int qtd_setor, int tam_setor)
 {
-    int i_setor = 0;    // Setor correspondente ao valor pesquisado
-    double pesadoPeso = 0;
-    char pesadoNome[TAM_STRING];
+    int i_setor = 0;                            // índice correspondente ao nome pesquisado
+    double pesado_peso = 0;
+    char pesado_nome[TAM_STRING];
     char pesquisa[TAM_STRING];
 
     printf("\t-  Procurar animal mais pesado de um Setor  -\t\n\n");
     printf("Insira o nome do setor onde pesquisar qual o animal mais pesado (Exatamente igual): ");
     setbuf (stdin, NULL);
-    fgets  (pesquisa, TAM_STRING, stdin);
+
+    fgets(pesquisa, TAM_STRING, stdin);
     pesquisa[strcspn(pesquisa, "\n")] = 0;     // Remove '\n' do final da string.
 
-    // Parsing do nome digitado pelo usuário com o index correspondente
-    while (strcmp(pesquisa, catalogo[i_setor]) != 0 )
-        i_setor++;
+    if(strcmp(pesquisa, "") == 0)
+    {
+        printf("[!] Erro: Campo de pesquisa em branco.\n");
+        return;
+    }
+
+    // Compara a string pesquisada com cada índice no Catálogo.
+    while (strcmp(pesquisa, catalogo[i_setor]) != 0)
+    {
+        if(i_setor < qtd_setor)
+            i_setor++;
+    }
 
     if (i_setor == qtd_setor)
     {
@@ -261,7 +291,7 @@ void animalMaisPesado(info_animal **zoo, char **catalogo, int qtd_setor, int tam
         return;
     }
 
-    // Aritmética para o primeiro elemento do setor informado (na primeira jaula)
+    // Aritmética para o primeiro elemento do setor informado (na primeira jaula).
     i_setor *= tam_setor;
 
     if ((*zoo)[i_setor].peso == 0)
@@ -270,23 +300,25 @@ void animalMaisPesado(info_animal **zoo, char **catalogo, int qtd_setor, int tam
         return;
     }
 
-    // Percorre todos os animais de toda a extensão do setor para encontrar o mais pesado deles.
+    // Percorre todos os animais da primeira à última posição do setor.
     for (int i_animal = i_setor; i_animal < (i_setor + tam_setor); i_animal++)
     {
-        if ((*zoo)[i_animal].peso > pesadoPeso)
+        if ((*zoo)[i_animal].peso > pesado_peso)
         {
-            pesadoPeso = (*zoo)[i_animal].peso;
-            strcpy(pesadoNome, (*zoo)[i_animal].nome);
+            pesado_peso = (*zoo)[i_animal].peso;
+            strcpy(pesado_nome, (*zoo)[i_animal].nome);
         }
     }
 
-    printf("[>] O animal mais pesado do Setor \"%s\" é o(a) %s (%0.2f kg).\n\n", pesquisa, pesadoNome, pesadoPeso);
+    printf("[>] O animal mais pesado do Setor \"%s\" é o(a) %s (%0.2f kg).\n\n", pesquisa, pesado_nome, pesado_peso);
     return;
 }
 
-/*  BRIEF: Preenche o catálogo a partir do último nome vazio.
-    PARAMS: Endereço do catálogo, quantidade de setores do zoológico.
-    RETURN: Nada.   */
+/*
+ * VISUALIZAR OU EDITAR STRINGS DO CATÁLOGO.
+ *      Preenche o catálogo a partir do último nome vazio. Ou imprime o nome de todos os setores.
+ *      Parâmetros: Endereço do vetor de strings (Catálogo), dimensões do zoológico.
+ * */
 void editarNomesCatalogo(char*** catalogo, int qtd_setor)
 {
     int escolha, nomeTam;
@@ -318,13 +350,13 @@ void editarNomesCatalogo(char*** catalogo, int qtd_setor)
         return;
     }
 
-    nomeTam = strlen ((*catalogo)[qtd_setor - 1]);
+    nomeTam = strlen ((*catalogo)[qtd_setor - 1]);              // Comprimento do nome do último setor no Catálogo.
 
     // Preencher catálogo, a partir do primeiro elemento vazio.
     if(nomeTam > 0)
         printf("[!] Todos os setores estão preenchidos, você não pode adicionar mais nenhum.\n");
     else {
-        for (int i = 0; i < qtd_setor; i++)
+        for (int i = 0; i < qtd_setor; i++)                     // Percorre o Catálogo em ordem, porém edita somente nomes vazios.
         {
             nomeTam = strlen ((*catalogo)[i]);
             if(nomeTam == 0)
@@ -341,21 +373,28 @@ void editarNomesCatalogo(char*** catalogo, int qtd_setor)
             }
         }
     }
-
-    printf("\n");
-    continuar();
+    
     return;
 }
 
+/*
+ * REALOCAR O ZOOLÓGICO PARA CONTER UM SETOR A MAIS OU UM A MENOS.
+ *      Aloca um novo endereço na memória para um zoológico com maior ou menor capacidade. Reordena o vetor zoo[] ao excluir um setor.
+ *      Parâmetros: Endereço do vetor com todos os animais, dimensões do zoológico,
+ *                  caractere 'a' para "Adicionar Setor",
+ *                  caractere 'r' para "Remover Setor",
+ *                  índice do setor a ser removido.
+ *      Retorna: Endereço na memória com espaço para mais N animais.
+ * */
 info_animal* alterarSetor(info_animal** zoo, int tam_zoo, int tam_setor, char c, int i_setor)
 {
     info_animal* novo_zoo;
     novo_zoo = *zoo;
 
-    // Remover setor e reordenar estrutura do zoológico.
+    // Remover setor e reordenar setores restantes.
     if(c == 'r')
     {
-        i_setor = (i_setor - 1) * tam_setor;
+        i_setor = (i_setor - 1) * tam_setor;        // Conversão da entrada humana em index para navegação no zoo[].
 
         for (int i  = i_setor; i < tam_zoo; i++)
         {
@@ -366,7 +405,7 @@ info_animal* alterarSetor(info_animal** zoo, int tam_zoo, int tam_setor, char c,
 
         return novo_zoo;
     }
-    // Adicionar setor .
+    // Adicionar setor. .
     else if(c == 'a')
     {
         novo_zoo = realloc(*zoo, (tam_zoo + tam_setor) * sizeof(info_animal));
@@ -376,6 +415,12 @@ info_animal* alterarSetor(info_animal** zoo, int tam_zoo, int tam_setor, char c,
     }
 }
 
+/*
+ * REALOCAR O CATÁLOGO PARA CONTER UM SETOR A MAIS OU UM A MENOS.
+ *      Aloca um novo endereço na memória para um catálogo com maior ou menor capacidade. Reordena a ordem dos nomes ao excluir um setor.
+ *      Parâmetros: Endereço do vetor de strings (Catálogo), e os memos da função editarNomesCatalogo(0).
+ *      Retorna: Ponteiro para um endereço na memória com mais N espaços para palavras.
+ * */
 char** alterarCatalogo(char*** catalogo, int qtd_setor, char c, int i_setor)
 {
     char** novo_catalogo;
@@ -384,22 +429,29 @@ char** alterarCatalogo(char*** catalogo, int qtd_setor, char c, int i_setor)
     novo_catalogo = *catalogo;
     tam_catalogo  = qtd_setor * sizeof(char *);
 
-    // Remover nome do catálogo e reodernar.
+    // Remover nome do catálogo e reordenar nomes restantes.
     if(c == 'r')
     {
-        for (int i = i_setor - 1; i < qtd_setor - 2; i++)
-            strcpy(novo_catalogo[i], novo_catalogo[i + 1]);
-        novo_catalogo = realloc (novo_catalogo, tam_catalogo - sizeof(char *));
+        if(qtd_setor == 1)
+        {
+            printf("[!] Você não pode remover o único setor do Zoológico.");
+            return *catalogo;
+        }
 
+        for (int i = i_setor - 1; i < qtd_setor-1; i++)
+            strcpy(novo_catalogo[i], novo_catalogo[i + 1]);
+        novo_catalogo = realloc (*catalogo, tam_catalogo - sizeof(char *));
+        conferirMalloc(novo_catalogo);
         printf("O Setor %d foi removido do Zoológico.\n", i_setor);
         return novo_catalogo;
     }
-    // Adicionar espaço para mais um nome no catálogo.
+    // Adicionar espaço e título para mais um nome no catálogo.
     else if(c == 'a')
     {
         novo_catalogo = realloc(*catalogo, tam_catalogo + sizeof(char *));
         conferirMalloc(novo_catalogo);
         novo_catalogo[qtd_setor] = malloc(TAM_STRING);
+        conferirMalloc(novo_catalogo);
 
         printf("[-] Insira o título do novo setor: ");
         setbuf(stdin, NULL);
@@ -418,6 +470,7 @@ void continuar(void)
     system("@cls||clear");     // Limpar a tela do terminal.
 }
 
+/* IMPRIMIR AS OPÇÕES AO USUÁRIO. */
 int printMenu(void)
 {
     printf( "----------  MENU  -------------\n \n");
@@ -436,7 +489,7 @@ int printMenu(void)
     return i;
 }
 
-// Assegurar que uma determinada alocação de memória foi bem sucedida.
+/* ASSEGURAR QUE UMA ALOCAÇÃO DE MEMÓRIA FOI BEM-SUCEDIDA. */
 void conferirMalloc (void *ptr)
 {
     if (ptr == NULL)
