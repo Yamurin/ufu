@@ -1,7 +1,7 @@
-Este programa foi desenvolvido para a disciplina de Algoritmos e Programação 2. **Tratando-se de um projeto para aprendizado, o código pode apresentar erros em sua estrutura ou design.**
+Este programa foi desenvolvido em linguagem C para a disciplina de Algoritmos e Programação 2. **Tratando-se de um projeto para aprendizado, o código pode apresentar erros em sua estrutura ou design.**
 
-# Gerenciador de Zoológico 
-O programa consiste em um gerenciador de animais em um zoológico, distribuídos em setores com quantidades iguais de jaulas. O usuário pode inserir novos animais e suas informações, além de gerenciar o número de setores.
+# 🐅 Gerenciador de Zoológico 
+Gerenciador de animais em um zoológico, distribuídos em setores com quantidades iguais de jaulas. O usuário pode inserir novos animais e suas informações, além de gerenciar o número de setores.
 
 O menu apresenta as seguintes opções:
 - Inicialização do sistema: o usuário irá entrar com o número de setores, de jaulas por setor, e de animais por jaula. 
@@ -15,6 +15,5 @@ As informações serão armazenadas dinâmicamente em uma estrutura de três dim
 animais de cada jaula.
 
 - Inserir novo setor: O sistema permite a inserção de um novo setor no zoológico.
-- 
 -  Remover setor: O sistema permite a remoção de um setor do zoológico.
 
