@@ -1,4 +1,4 @@
-Este programa foi desenvolvido para a disciplina de Algoritmos e Programação 2. **Tratando-se de um projeto para aprendizado, o código pode apresentar erros em sua estrutura ou design. **
+Este programa foi desenvolvido para a disciplina de Algoritmos e Programação 2. **Tratando-se de um projeto para aprendizado, o código pode apresentar erros em sua estrutura ou design.**
 
 # Gerenciador de Zoológico 
 O programa consiste em um gerenciador de animais em um zoológico, distribuídos em setores com quantidades iguais de jaulas. O usuário pode inserir novos animais e suas informações, além de gerenciar o número de setores.
