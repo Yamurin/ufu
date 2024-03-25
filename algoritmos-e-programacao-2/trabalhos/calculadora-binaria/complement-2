@@ -7,115 +7,109 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <locale.h>  // Biblioteca para exibir caracteres do PT-BR
 
 #define STR_BUF 1024
 // Protótipo de funções
 int printMenu(void);
-int get_binary (int **bin, char binStr[STR_BUF]);
-void printBinary (int** bin, int len);
+int get_binary (int **bin);
+void printBin (int** bin, int len);
+int* sum_binary (int** num1, int** num2, int num1Len, int num2Len);
+int* complement (int **bin, int binLen);
 
-int* sum_binary (int** num1, int** num2, int num1Len, int num2Len) 
+/*
+ *  CÁLCULA O COMPLEMENTO DE 2 DE UM NÚMERO BINÁRIO
+ *  Parâmetro: Vetor com o número binário (no sistema de representação do complemento de 2) a ser convertido
+ *  Retorna: Vetor com o número binário complemento 
+ */
+
+int* complement (int **bin, int binLen)
+{
+    int* auxBin;    // Binário que representa +1 (01 em comp. 2)
+
+    printf("Complemento de: ");
+    printBin(bin, binLen);
+    printf("\n");
+
+    //alternar todos os valores
+    // somar 01
+    for (int i = 0; i < binLen; i++)
+        (*bin)[i] = (*bin)[i] == 0 ? 1 : 0;
+
+    auxBin = calloc(2 , sizeof(int));
+    auxBin[0] = 0;
+    auxBin[1] = 1;
+
+    *bin = sum_binary(bin, &auxBin, binLen, 2);
+
+    return *bin;
+}
+
+int* subt_binary (int** num1, int** num2, int num1Len, int num2Len)
 {
     int* total = NULL;
     int totalLen;
-    
+
     int idx1 = num1Len - 1;
     int idx2 = num2Len - 1;
-    
+
     int carry  = 0;
-    int auxSum = 0;
-    
+
     totalLen = num1Len > num2Len ? num1Len : num2Len;           // O resultado tem tantos dígitos quanto o maior numero
     total = calloc(totalLen, sizeof(int));
-    
-    printf("idx1 = %d \t idx2 = %d\nSomando: \n", idx1, idx2);
-    printBinary(num1, num1Len);
-    printf(" + ");
-    printBinary(num2, num2Len);
-    
-    for (int i = totalLen - 1; i >= 0; i--) {                       // Despreza o último query, se houver
-        auxSum = 0 + carry;
-        
-        printf("\ntotal[%d]: ", i);
-        if (idx1 >= 0) {
-            auxSum += (*num1)[idx1];
-            printf("%d + ", (*num1)[idx1]);
-            idx1--;
-        } else {
-            printf("1 + ");
-            if ((*num1)[0] == 1)
-                auxSum += 1;
-        }
-        
-        if (idx2 >= 0) {
-            auxSum += (*num2)[idx2];
-            printf("%d + ", (*num2)[idx2]);
-            idx2--;
-        } else {
-            printf("1 + ");
-            if ((*num2)[0] == 1)
-                auxSum += 1;
-        }
-        
-        printf("%d = ", carry);
-        
-        if (auxSum <= 1) {
-            total[i] = auxSum;
-            carry = 0;
-        } else {
-            total[i] = auxSum % 2;          // Soma o 'carry' ao dígito, mas sem sobrescrever o valor da soma desse mesmo dígito com o próximo
-            carry = 1;
-        }
-    
-        printf("%d (+ %d)\n", auxSum, carry);
-    }
-    
-    return total;
+
+    //complemento de num2
+    // sum(num1, num2)
 }
 
 int main ()
 {
-    char binStr[STR_BUF];                   // Entrada do usuário.
+    setlocale(LC_ALL, "Portuguese");
+
     int* num1  = NULL;
     int* num2  = NULL;
     int* total = NULL;
-    int num1Len, num2Len, totalLen;         // Quantidade de dígitos nos operadores e no resultado.
-    
+    int num1Len, num2Len;         // Quantidade de dígitos nos operadores e no resultado.
+
     switch (printMenu())
     {
         case 1:
-        setbuf(stdin, NULL);
-        fgets(binStr, STR_BUF, stdin);
-        num1Len = get_binary(&num1, binStr);
-        
-        printf("+ ");
-        setbuf(stdin, NULL);
-        fgets(binStr, STR_BUF, stdin);
-        num2Len = get_binary(&num2, binStr);
-        
-        totalLen = num1Len > num2Len ? num1Len : num2Len;
-        total = sum_binary(&num1, &num2, num1Len, num2Len);
-        
-        printf("\nnum1 + num2 = ");
-        printBinary(&num1, num1Len);
-        printf(" + ");
-        printBinary(&num2, num2Len);
-        printf("\n= ");
-        printBinary(&total, totalLen);
-        
+            num1Len = get_binary(&num1);
+            printf("+ ");
+            num2Len = get_binary(&num2);
+
+            printBin(&num1, num1Len);
+            printf(" + ");
+            printBin(&num2, num2Len);
+            printf("\n= ");
+
+            total = sum_binary(&num1, &num2, num1Len, num2Len);
+            break;
+
+        case 2:
+            num1Len = get_binary(&num1);
+            num1 = complement(&num1, num1Len);
+            printf("= ");
+            printBin(&num1, num1Len);
+
+            break;
     }
 
     return 0;
 }
 
-int get_binary (int **bin, char binStr[STR_BUF])
+int get_binary (int **bin)
 {
+    char binStr[STR_BUF];                   // Entrada do usuário.
+    setbuf(stdin, NULL);
+    fgets(binStr, STR_BUF, stdin);
+
     int binLen = 0;                              // Número de dígitos da entrada
 
     // Converte a string digitada para números em um vetor dinâmico
     for (int i = 0; binStr[i] != '\0' && binStr[i] != '\n'; i++) {
         binLen++;
-        *bin = realloc(*bin, sizeof(int) + binLen);
+        *bin = realloc(*bin, sizeof(int) * binLen);
 
         if (*bin == NULL) {
             printf("Falha ao alocar memória. Reinicie o programa.\n");
@@ -128,20 +122,78 @@ int get_binary (int **bin, char binStr[STR_BUF])
     return binLen;
 }
 
+int* sum_binary (int** num1, int** num2, int num1Len, int num2Len)
+{
+    int* total = NULL;
+    int totalLen;
+
+    int idx1 = num1Len - 1;
+    int idx2 = num2Len - 1;
+
+    int carry  = 0;
+
+    totalLen = num1Len > num2Len ? num1Len : num2Len;           // O resultado tem tantos dígitos quanto o maior numero
+    total = calloc(totalLen, sizeof(int));
+
+    printBin(num1, num1Len);
+    printf(" + ");
+    printBin(num2, num2Len);
+
+    for (int i = totalLen - 1; i >= 0; i--) {                       // Despreza o último query, se houver
+        int auxSum = 0 + carry;
+
+        printf("\ntotal[%d]: ", i);
+        if (idx1 >= 0) {
+            auxSum += (*num1)[idx1];
+            printf("%d + ", (*num1)[idx1]);
+            idx1--;
+        } else {
+            printf("1 + ");
+            if ((*num1)[0] == 1)
+                auxSum += 1;
+        }
+
+        if (idx2 >= 0) {
+            auxSum += (*num2)[idx2];
+            printf("%d + ", (*num2)[idx2]);
+            idx2--;
+        } else {
+            printf("1 + ");
+            if ((*num2)[0] == 1)
+                auxSum += 1;
+        }
+
+        printf("%d = ", carry);
+
+        if (auxSum <= 1) {
+            carry = 0;
+        } else {
+            auxSum = auxSum % 2;          // Soma o 'carry' ao dígito, mas sem sobrescrever o valor da soma desse mesmo dígito com o próximo
+            carry = 1;
+        }
+
+        total[i] = auxSum;
+        printf("%d (+ %d)\n", auxSum, carry);
+    }
+
+    printBin(&total, totalLen);
+    return total;
+}
+
 int printMenu (void)
 {
     printf("Selecione a operação: \n");
-    printf("1. Soma \n");
+    printf("1. Soma \n2. Subtração\n");
 
     int escolha;
     scanf("%d", &escolha);
-    
+
     printf("Digite um número (Notação em complemento de 2): \n  ");
-    
+
     return escolha;
 }
 
-void printBinary (int** bin, int len)
+void printBin (int** bin, int len)
 {
     int i = 0;
     while (i < len) {
