@@ -10,43 +10,16 @@
 #include <locale.h>  // Biblioteca para exibir caracteres do PT-BR
 
 #define STR_BUF 1024
-// Protótipo de funções
-int printMenu(void);
-int get_binary (int **bin);
-void printBin (int** bin, int len);
+
+/* PROTÓTIPOS DE FUNÇÕES */
 int* sum_binary (int** num1, int** num2, int num1Len, int num2Len);
+int* sub_binary (int** num1, int** num2, int num1Len, int num2Len);
+
+void printBin  (int** bin, int len);
+int  printMenu (void);
+
+int  get_binary (int **bin);
 int* complement (int **bin, int binLen);
-int* subt_binary (int** num1, int** num2, int num1Len, int num2Len);
-/*
- *  CÁLCULA O COMPLEMENTO DE 2 DE UM NÚMERO BINÁRIO: Inverte os bits e soma +1
- *  Parâmetro: Vetor com o número binário (no sistema de representação do complemento de 2) a ser convertido
- *  Retorna: Vetor com o número binário complemento
- */
-
-int* complement (int **bin, int binLen)
-{
-    int* auxBin;    // Binário que representa +1 (01 em comp. 2)
-
-    for (int i = 0; i < binLen; i++)
-        (*bin)[i] = (*bin)[i] == 0 ? 1 : 0;
-
-    auxBin = calloc(2 , sizeof(int));
-    auxBin[0] = 0;
-    auxBin[1] = 1;
-
-    *bin = sum_binary(bin, &auxBin, binLen, 2);
-    return *bin;
-}
-
-int* subt_binary (int** num1, int** num2, int num1Len, int num2Len)
-{
-    int* total = NULL;
-
-    *num2 = complement(num2, num2Len);
-    total = sum_binary(num1, num2, num1Len, num2Len);
-
-    return total;
-}
 
 int main ()
 {
@@ -58,11 +31,13 @@ int main ()
     int num1Len, num2Len;         // Quantidade de dígitos nos operadores e no resultado.
     int totalLen;
 
+    totalLen = num1Len > num2Len ? num1Len : num2Len;
+
     switch (printMenu())
     {
         case 1:
             num1Len = get_binary(&num1);
-            printf("+ ");
+            printf("+\n");
             num2Len = get_binary(&num2);
 
             printBin(&num1, num1Len);
@@ -71,7 +46,8 @@ int main ()
             printf("\n= ");
 
             total = sum_binary(&num1, &num2, num1Len, num2Len);
-            printBin(&total, num2Len); // TODO
+            if (total != NULL)
+                printBin(&total, totalLen);
             break;
 
         case 2:
@@ -79,23 +55,29 @@ int main ()
             printf("- ");
             num2Len = get_binary(&num2);
 
-            total = subt_binary(&num1, &num2, num1Len, num2Len);
-            printBin(&total, num2Len); // TODO
+            total = sub_binary(&num1, &num2, num1Len, num2Len);
+            if (total != NULL)
+                printBin(&total, totalLen);
             break;
     }
 
     return 0;
 }
 
+/*
+ *  CONVERTE UMA STRING EM UM VETOR COM DÍGITOS CORRESPONDENTES.
+ *  Parâmetro: String digitada pelo usuário.
+ *  Ação:      Aloca dinamicamente um vetor com todos os dígitos da string, representando um número binário.
+ *  Retorna:   Número de dígitos do número binário (vetor) alocado.
+ */
 int get_binary (int **bin)
 {
-    char binStr[STR_BUF];                   // Entrada do usuário.
+    char binStr[STR_BUF];
     setbuf(stdin, NULL);
     fgets(binStr, STR_BUF, stdin);
 
     int binLen = 0;                              // Número de dígitos da entrada
 
-    // Converte a string digitada para números em um vetor dinâmico
     for (int i = 0; binStr[i] != '\0' && binStr[i] != '\n'; i++) {
         binLen++;
         *bin = realloc(*bin, sizeof(int) * binLen);
@@ -111,6 +93,12 @@ int get_binary (int **bin)
     return binLen;
 }
 
+/*
+ *  FAZ A SOMA BINÁRIA ENTRE DOIS NÚMEROS DE MESMO SINAL TODO: Prevenir casos de overflow
+ *  Parâmetro: Dois números binários (vetores), quantidades de dígitos de cada vetor.
+ *  Ação:      Faz a soma binária, seguindo a notação do complemento de 2 (onde o "carry" do número mais significativo é desprezado).
+ *  Retorna:   Vetor com o resultado da soma binária dos números de parâmetro.
+ */
 int* sum_binary (int** num1, int** num2, int num1Len, int num2Len)
 {
     int* total = NULL;
@@ -124,11 +112,7 @@ int* sum_binary (int** num1, int** num2, int num1Len, int num2Len)
     totalLen = num1Len > num2Len ? num1Len : num2Len;           // O resultado tem tantos dígitos quanto o maior numero
     total = calloc(totalLen, sizeof(int));
 
-   /* printBin(num1, num1Len);
-    printf(" + ");
-    printBin(num2, num2Len);*/
-
-    for (int i = totalLen - 1; i >= 0; i--) {                       // Despreza o último query, se houver
+    for (int i = totalLen - 1; i >= 0; i--) {                       // Despreza o último carry, se houver
         int auxSum = 0 + carry;
 
         //printf("\ntotal[%d]: ", i);
@@ -165,9 +149,22 @@ int* sum_binary (int** num1, int** num2, int num1Len, int num2Len)
         //printf("%d (+ %d)\n", auxSum, carry);
     }
 
+    // Previne overflow
+    if (   ((*num1)[0] == 0 && (*num2)[0] == 0 && total[0] == 0)
+        || ((*num1)[0] == 1 && (*num2)[0] == 1 && total[0] == 0) ) {
+        printf("ERRO DE OVERFLOW: Estes números não podem ser somados no sistema de representação de complemento de 2. Por favor, insira números com mais bits.");
+        return NULL;
+    }
+
     return total;
 }
 
+/*
+ *  IMPRIME AS OPÇÕES DE OPERAÇÕES NA TELA.
+ *  Parâmetro: Nada
+ *  Ação:      Imprime texto na tela.
+ *  Retorna:   Inteiro com o número da opção escolhida pelo usuário.
+ */
 int printMenu (void)
 {
     printf("Selecione a operação: \n");
@@ -181,6 +178,9 @@ int printMenu (void)
     return escolha;
 }
 
+/*
+ *  PERCORRE O NÚMERO BINÁRIO E O MOSTRA NA TELA DE FORMA CONTÍNUA.
+ */
 void printBin (int** bin, int len)
 {
     int i = 0;
@@ -188,4 +188,35 @@ void printBin (int** bin, int len)
         printf("%d", (*bin)[i]);
         i++;
     }
+}
+
+/*
+ *  CALCULA A NEGAÇÃO DE UM NÚMERO BINÁRIO: Inverte os bits e soma +1
+ *  Parâmetro: Vetor com o número binário (no sistema de representação do complemento de 2) a ser convertido
+ *  Ação:      Faz o complemento de 2 do número de entrada: Inverte os bits e soma +1 (em notação de comp. 2: 01)
+ *  Retorna:   Vetor com o número binário complemento
+ */
+int* complement (int **bin, int binLen)
+{
+    int* auxBin;    // Binário que representa +1 (01 em comp. 2)
+
+    for (int i = 0; i < binLen; i++)
+        (*bin)[i] = (*bin)[i] == 0 ? 1 : 0;
+
+    auxBin = calloc(2 , sizeof(int));
+    auxBin[0] = 0;
+    auxBin[1] = 1;
+
+    *bin = sum_binary(bin, &auxBin, binLen, 2);
+    return *bin;
+}
+
+int* sub_binary (int** num1, int** num2, int num1Len, int num2Len)
+{
+    int* total = NULL;
+
+    *num2 = complement(num2, num2Len);
+    total = sum_binary(num1, num2, num1Len, num2Len);
+
+    return total;
 }
