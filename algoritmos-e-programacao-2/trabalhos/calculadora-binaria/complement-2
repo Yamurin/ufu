@@ -1,0 +1,151 @@
+/*
+* http://www2.ic.uff.br/~boeres/slides_FAC/FAC-complemento-um-e-dois.pdf
+* http://www.furtado.prof.ufu.br/site/teaching/SD/SD-Modulo2.pdf
+* https://edisciplinas.usp.br/pluginfile.php/4228767/mod_resource/content/1/complemento2.pdf
+* https://www.doc.ic.ac.uk/~eedwards/compsys/arithmetic/index.html
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define STR_BUF 1024
+// Protótipo de funções
+int printMenu(void);
+int get_binary (int **bin, char binStr[STR_BUF]);
+void printBinary (int** bin, int len);
+
+int* sum_binary (int** num1, int** num2, int num1Len, int num2Len) 
+{
+    int* total = NULL;
+    int totalLen;
+    
+    int idx1 = num1Len - 1;
+    int idx2 = num2Len - 1;
+    
+    int carry  = 0;
+    int auxSum = 0;
+    
+    totalLen = num1Len > num2Len ? num1Len : num2Len;           // O resultado tem tantos dígitos quanto o maior numero
+    total = calloc(totalLen, sizeof(int));
+    
+    printf("idx1 = %d \t idx2 = %d\nSomando: \n", idx1, idx2);
+    printBinary(num1, num1Len);
+    printf(" + ");
+    printBinary(num2, num2Len);
+    
+    for (int i = totalLen - 1; i >= 0; i--) {                       // Despreza o último query, se houver
+        auxSum = 0 + carry;
+        
+        printf("\ntotal[%d]: ", i);
+        if (idx1 >= 0) {
+            auxSum += (*num1)[idx1];
+            printf("%d + ", (*num1)[idx1]);
+            idx1--;
+        } else {
+            printf("1 + ");
+            if ((*num1)[0] == 1)
+                auxSum += 1;
+        }
+        
+        if (idx2 >= 0) {
+            auxSum += (*num2)[idx2];
+            printf("%d + ", (*num2)[idx2]);
+            idx2--;
+        } else {
+            printf("1 + ");
+            if ((*num2)[0] == 1)
+                auxSum += 1;
+        }
+        
+        printf("%d = ", carry);
+        
+        if (auxSum <= 1) {
+            total[i] = auxSum;
+            carry = 0;
+        } else {
+            total[i] = auxSum % 2;          // Soma o 'carry' ao dígito, mas sem sobrescrever o valor da soma desse mesmo dígito com o próximo
+            carry = 1;
+        }
+    
+        printf("%d (+ %d)\n", auxSum, carry);
+    }
+    
+    return total;
+}
+
+int main ()
+{
+    char binStr[STR_BUF];                   // Entrada do usuário.
+    int* num1  = NULL;
+    int* num2  = NULL;
+    int* total = NULL;
+    int num1Len, num2Len, totalLen;         // Quantidade de dígitos nos operadores e no resultado.
+    
+    switch (printMenu())
+    {
+        case 1:
+        setbuf(stdin, NULL);
+        fgets(binStr, STR_BUF, stdin);
+        num1Len = get_binary(&num1, binStr);
+        
+        printf("+ ");
+        setbuf(stdin, NULL);
+        fgets(binStr, STR_BUF, stdin);
+        num2Len = get_binary(&num2, binStr);
+        
+        totalLen = num1Len > num2Len ? num1Len : num2Len;
+        total = sum_binary(&num1, &num2, num1Len, num2Len);
+        
+        printf("\nnum1 + num2 = ");
+        printBinary(&num1, num1Len);
+        printf(" + ");
+        printBinary(&num2, num2Len);
+        printf("\n= ");
+        printBinary(&total, totalLen);
+        
+    }
+
+    return 0;
+}
+
+int get_binary (int **bin, char binStr[STR_BUF])
+{
+    int binLen = 0;                              // Número de dígitos da entrada
+
+    // Converte a string digitada para números em um vetor dinâmico
+    for (int i = 0; binStr[i] != '\0' && binStr[i] != '\n'; i++) {
+        binLen++;
+        *bin = realloc(*bin, sizeof(int) + binLen);
+
+        if (*bin == NULL) {
+            printf("Falha ao alocar memória. Reinicie o programa.\n");
+            exit(1);
+        }
+
+        (*bin)[i] = binStr[i] == '1' ? 1 : 0;
+    }
+
+    return binLen;
+}
+
+int printMenu (void)
+{
+    printf("Selecione a operação: \n");
+    printf("1. Soma \n");
+
+    int escolha;
+    scanf("%d", &escolha);
+    
+    printf("Digite um número (Notação em complemento de 2): \n  ");
+    
+    return escolha;
+}
+
+void printBinary (int** bin, int len)
+{
+    int i = 0;
+    while (i < len) {
+        printf("%d", (*bin)[i]);
+        i++;
+    }
+}
