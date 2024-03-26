@@ -262,23 +262,40 @@ int* mult_binary (int** num1, int** num2, int num1Len, int num2Len) {
     int totalLen;
     int startLen = num1Len;                                                 // Quantidade inicial de bits no multiplicando.
     int shift = 0;                                                          // "Empurrar" casas do multiplicando para a esquerda ao longo da multiplicação.
-    int switchSign = 0;                                                     // 0) Falso, 1) Verdadeiro
+    int switchSign = 0;                                                     // 0) Falso, 1) Verdadeiro, converter um número binário para negativo
 
     totalLen = num1Len > num2Len ? 2 * num1Len : 2 * num2Len;               // O produto sempre terá 2n dígitos, sendo n o número de dígito do maior operando
 
     total = calloc(totalLen, sizeof(int));
 
+    /*Aplicar regra de sinais se necessário. */
+    if ((*num1)[0] != (*num2)[0] )
+        switchSign = 1;
+
+    /*Converter números negativos em positivos. */
+    if ((*num1)[0] == 1)
+        *num1 = complement(num1, num1Len);
+    if ((*num2)[0] == 1)
+        *num2 = complement(num2, num2Len);
+
     /* Multiplicação binária somando os resultados parciais de dois a dois. */
     for(int i = num2Len - 1; i >= 0; i--) {
+        /*A cada nível da multiplicação, adicionar mais uma "casa" e fazer a extensão com zeros*/
         *num1 = realloc(*num1, (num1Len + shift) * sizeof(int));
         num1Len = startLen + shift;
-        for (int k = num1Len - 1; k > startLen - 1; k--)
-            num1[k] = 0;
+        for (int k = startLen - 1; k < num1Len; k++)
+            (*num1)[k] = 0;
 
         if ((*num2)[i] == 1)
             total = sum_binary(num1, &total, num1Len, totalLen);
 
         shift++;
     }
+
+    if (switchSign) {
+        printf("switching.\n");
+        complement(&total, totalLen);
+    }
+
     return total;
 }
