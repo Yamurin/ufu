@@ -49,8 +49,6 @@ int main ()
                 printf("\n= ");
 
                 total = sum_binary(&num1, &num2, num1Len, num2Len);
-                if (total != NULL)
-                    printBin(&total, totalLen);
                 break;
 
             case 2:
@@ -61,8 +59,6 @@ int main ()
                 totalLen = num1Len > num2Len ? num1Len : num2Len;
 
                 total = sub_binary(&num1, &num2, num1Len, num2Len);
-                if (total != NULL)
-                    printBin(&total, totalLen);
                 break;
 
             case 3:
@@ -70,14 +66,24 @@ int main ()
                 printf("* ");
                 num2Len = get_binary(&num2);
 
+                totalLen = num1Len > num2Len ? 2 * num1Len : 2 * num2Len;
                 total = mult_binary(&num1, &num2, num1Len, num2Len);
 
                 break;
+
+            case 4:
+                num1Len = get_binary(&num1);
+                totalLen = num1Len;
+                total = complement(&num1, num1Len);
+                break;
+
             case 12:
                 printf("Saindo do sistema...");
                 // free memoria
                 exit(1);
         }
+        if (total != NULL)
+            printBin(&total, totalLen);
     }
     return 0;
 }
@@ -186,7 +192,7 @@ int* sum_binary (int** num1, int** num2, int num1Len, int num2Len)
 int printMenu (void)
 {
     printf("\nSelecione a operação: \n");
-    printf("1. Soma \n2. Subtração\n");
+    printf("1. Soma \n2. Subtração\n3.Multiplicação\n4.Complemento");
 
     int escolha;
     scanf("%d", &escolha);
@@ -252,18 +258,17 @@ int* sub_binary (int** num1, int** num2, int num1Len, int num2Len)
  */
 int* mult_binary (int** num1, int** num2, int num1Len, int num2Len) {
 
-    // num1 é multiplicando e num2 é multiplicador
-    // testando para valore sd ebts iguais, apenas positivos em comp2
     int* total = NULL;
     int totalLen;
-    int shift = 0;
-    int startLen = num1Len;
+    int startLen = num1Len;                                                 // Quantidade inicial de bits no multiplicando.
+    int shift = 0;                                                          // "Empurrar" casas do multiplicando para a esquerda ao longo da multiplicação.
+    int switchSign = 0;                                                     // 0) Falso, 1) Verdadeiro
 
-    totalLen = num1Len > num2Len ? num1Len : num2Len;
-    totalLen *= 2;                                          // O produto sempre terá 2n dígitos, sendo n o número de dígitos dos operandos
+    totalLen = num1Len > num2Len ? 2 * num1Len : 2 * num2Len;               // O produto sempre terá 2n dígitos, sendo n o número de dígito do maior operando
 
     total = calloc(totalLen, sizeof(int));
 
+    /* Multiplicação binária somando os resultados parciais de dois a dois. */
     for(int i = num2Len - 1; i >= 0; i--) {
         *num1 = realloc(*num1, (num1Len + shift) * sizeof(int));
         num1Len = startLen + shift;
@@ -275,10 +280,5 @@ int* mult_binary (int** num1, int** num2, int num1Len, int num2Len) {
 
         shift++;
     }
-
-    for (int i = 0; i < totalLen; i++) {
-        printf("%d", total[i]);
-    }
-    printf("\n");
     return total;
 }
