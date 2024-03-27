@@ -15,6 +15,7 @@
 int* sum_binary  (int** num1, int** num2, int num1Len, int num2Len);
 int* sub_binary  (int** num1, int** num2, int num1Len, int num2Len);
 int* mult_binary (int** num1, int** num2, int num1Len, int num2Len);
+int* div_binary  (int** num1, int** num2, int num1Len, int num2Len, char opt); // divisão e resto
 
 void printBin  (int** bin, int len);
 int  printMenu (void);
@@ -32,9 +33,10 @@ int main ()
     int* total = NULL;
     int num1Len, num2Len;         // Quantidade de dígitos nos operadores e no resultado.
     int totalLen;
-
-    while (1) {
-        switch (printMenu())
+    
+    while (1) {         // tirar repetição deentrada de caracters
+        
+        switch (printMenu())  
         {
             case 1:
                 num1Len = get_binary(&num1);
@@ -59,6 +61,7 @@ int main ()
                 totalLen = num1Len > num2Len ? num1Len : num2Len;
 
                 total = sub_binary(&num1, &num2, num1Len, num2Len);
+                printBin(&total, totalLen);
                 break;
 
             case 3:
@@ -68,10 +71,23 @@ int main ()
 
                 totalLen = num1Len > num2Len ? 2 * num1Len : 2 * num2Len;
                 total = mult_binary(&num1, &num2, num1Len, num2Len);
+                printBin(&total, totalLen);
 
                 break;
-
-            case 4:
+            
+            case 4: // Divisão 
+                num1Len = get_binary(&num1);
+                printf("/ ");
+                num2Len = get_binary(&num2);
+                total = div_binary(&num1, &num2, num1Len, num2Len, 'q');
+                 totalLen = num1Len > num2Len ? num1Len : num2Len;
+                printBin(&total, totalLen);
+                
+                
+            case 5: // resto
+                div_binary(&num1, &num2, num1Len, num2Len, 'r');
+            
+            case 7: // complemento
                 num1Len = get_binary(&num1);
                 totalLen = num1Len;
                 total = complement(&num1, num1Len);
@@ -136,47 +152,40 @@ int* sum_binary (int** num1, int** num2, int num1Len, int num2Len)
     totalLen = num1Len > num2Len ? num1Len : num2Len;           // O resultado tem tantos dígitos quanto o maior numero
     total = calloc(totalLen, sizeof(int));
 
-    for (int i = totalLen - 1; i >= 0; i--) {                       // Despreza o último carry, se houver
+    for (int i = totalLen - 1; i >= 0; i--) {                   // Despreza o último carry, se houver
         int auxSum = 0 + carry;
-
-        //printf("\ntotal[%d]: ", i);
+        
         if (idx1 >= 0) {
             auxSum += (*num1)[idx1];
-            //printf("%d + ", (*num1)[idx1]);
             idx1--;
         } else {
-            //printf("1 + ");
             if ((*num1)[0] == 1)
                 auxSum += 1;
         }
 
         if (idx2 >= 0) {
             auxSum += (*num2)[idx2];
-            //printf("%d + ", (*num2)[idx2]);
             idx2--;
         } else {
-            //printf("1 + ");
             if ((*num2)[0] == 1)
                 auxSum += 1;
         }
 
-        //printf("%d = ", carry);
-
         if (auxSum <= 1) {
             carry = 0;
         } else {
-            auxSum = auxSum % 2;          // Soma o 'carry' ao dígito, mas sem sobrescrever o valor da soma desse mesmo dígito com o próximo
+            auxSum = auxSum % 2;                                // Soma o 'carry' ao dígito, mas sem sobrescrever o valor da soma desse mesmo dígito com o próximo
             carry = 1;
         }
 
         total[i] = auxSum;
-        //printf("%d (+ %d)\n", auxSum, carry);
     }
 
     // Previne overflow
     if (   ((*num1)[0] == 0 && (*num2)[0] == 0 && total[0] == 1)
            || ((*num1)[0] == 1 && (*num2)[0] == 1 && total[0] == 0) ) {
-        printf("ERRO DE OVERFLOW: Estes números não podem ser somados no sistema de representação de complemento de 2. Por favor, insira números com mais bits.");
+        printf("ERRO DE OVERFLOW: Estes números não podem ser somados no sistema de representação de complemento de 2.");
+        printf("Por favor, insira números com mais bits.\n");
         return NULL;
     }
 
@@ -192,7 +201,7 @@ int* sum_binary (int** num1, int** num2, int num1Len, int num2Len)
 int printMenu (void)
 {
     printf("\nSelecione a operação: \n");
-    printf("1. Soma \n2. Subtração\n3.Multiplicação\n4.Complemento");
+    printf("1. Soma \n2. Subtração\n3.Multiplicação\n4.Divisão\n5.Resto\n7.Absoluto");
 
     int escolha;
     scanf("%d", &escolha);
@@ -298,4 +307,44 @@ int* mult_binary (int** num1, int** num2, int num1Len, int num2Len) {
     }
 
     return total;
+}
+
+int* div_binary (int** num1, int** num2, int num1Len, int num2Len, char opt) // divisão e resto
+{
+    int* dividend = NULL;
+    int* quotient = NULL;
+    int* partial  = NULL;
+    int* remain  = NULL;
+    int* bigger  = NULL;
+    int* aux = calloc(2, sizeof(int));      // Numero 01 em binario 
+    int totalLen; 
+    
+    aux[1] = 1;
+    
+    dividend  = complement(num2, num2Len);
+    partial   = sum_binary(num1, num2, num1Len, num2Len);
+    totalLen  = num1Len > num2Len ? num1Len : num2Len;
+    quotient  = calloc(totalLen, sizeof(int)); 
+    
+    while (bigger == partial) {
+        partial = sum_binary(&partial, &dividend, totalLen, num2Len);
+        quotient = sum_binary(&quotient, &aux, totalLen, 2); 
+
+        for (int i = 0; i < num2Len; i++) {     // ve se o num2 eh maior que o produto parcial 
+            if ((*num2)[i] < partial[i]) {
+                bigger = partial;
+                break;
+            }
+        }
+    }
+    
+    if ((*num1)[0] != (*num2)[0]) {
+        complement(&partial, totalLen);
+    }
+
+    
+    if (opt == 'r') 
+        return remain;  // total is actually the remain
+    else if (opt == 'q')
+        return quotient;
 }
