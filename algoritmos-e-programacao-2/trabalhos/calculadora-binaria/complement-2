@@ -15,13 +15,15 @@
 int* sum_binary  (int** num1, int** num2, int num1Len, int num2Len);
 int* sub_binary  (int** num1, int** num2, int num1Len, int num2Len);
 int* mult_binary (int** num1, int** num2, int num1Len, int num2Len);
-int* div_binary  (int** num1, int** num2, int num1Len, int num2Len, char opt); // divisão e resto
+int bin_to_hex(int** num, int numLen);
 
 void printBin  (int** bin, int len);
 int  printMenu (void);
 
 int  get_binary (int **bin);
 int* complement (int **bin, int binLen);
+
+
 
 int main ()
 {
@@ -75,17 +77,6 @@ int main ()
 
                 break;
 
-            case 4: // Divisão
-                num1Len = get_binary(&num1);
-                printf("/ ");
-                num2Len = get_binary(&num2);
-                total = div_binary(&num1, &num2, num1Len, num2Len, 'q');
-                totalLen = num1Len > num2Len ? num1Len : num2Len;
-                printBin(&total, totalLen);
-
-
-            case 5: // resto
-                div_binary(&num1, &num2, num1Len, num2Len, 'r');
 
             case 7: // complemento
                 num1Len = get_binary(&num1);
@@ -97,6 +88,14 @@ int main ()
                 printf("Saindo do sistema...");
                 // free memoria
                 exit(1);
+
+            case 9: // complemento
+                num1Len = get_binary(&num1);
+                totalLen = num1Len;
+                int hex;
+                hex = bin_to_hex(&num1, num1Len);
+                printf("HeX: %d\n", hex);
+                break;
         }
         if (total != NULL)
             printBin(&total, totalLen);
@@ -314,42 +313,28 @@ int* mult_binary (int** num1, int** num2, int num1Len, int num2Len) {
     return total;
 }
 
-int* div_binary (int** num1, int** num2, int num1Len, int num2Len, char opt) // divisão e resto
+int bin_to_hex(int** num, int numLen)
 {
-    int* dividend = NULL;
-    int* quotient = NULL;
-    int* partial  = NULL;
-    int* remain  = NULL;
-    int* bigger  = NULL;
-    int* aux = calloc(2, sizeof(int));      // Numero 01 em binario
-    int totalLen;
+    int dec = 0;                // Valor decimal
+    int flipSign = 0;           // 0- Sinal NÃO precisa ser alterado, 1- Sinal precisa ser alterado
+    int pow = 1;                // Valor decimal de cada posição binária
 
-    aux[1] = 1;
-
-    dividend  = complement(num2, num2Len);
-    partial   = sum_binary(num1, num2, num1Len, num2Len);
-    totalLen  = num1Len > num2Len ? num1Len : num2Len;
-    quotient  = calloc(totalLen, sizeof(int));
-
-    while (bigger == partial) {
-        partial = sum_binary(&partial, &dividend, totalLen, num2Len);
-        quotient = sum_binary(&quotient, &aux, totalLen, 2);
-
-        for (int i = 0; i < num2Len; i++) {     // ve se o num2 eh maior que o produto parcial
-            if ((*num2)[i] < partial[i]) {
-                bigger = partial;
-                break;
-            }
-        }
+    /* Verifica se o número a ser convertido é negativo.  */
+    if ((*num)[0] == 1) {
+        *num = complement(num, numLen);
+        flipSign = 1;
     }
 
-    if ((*num1)[0] != (*num2)[0]) {
-        complement(&partial, totalLen);
+    /* Para cada posição binária,s oma o valor decimal correspondente (1, 2, 4, 8...) */
+    for (int i = numLen - 1; i > 0; i--) {
+        pow = 1;
+        for (int j = numLen - 1; j > i; j--)
+            pow *= 2;
+        dec += (*num)[i] * pow;
     }
 
+    if (flipSign == 1)
+        return (dec * (-1));
 
-    if (opt == 'r')
-        return remain;  // total is actually the remain
-    else if (opt == 'q')
-        return quotient;
+    return dec;
 }
