@@ -14,7 +14,7 @@
 /* PROTÓTIPOS DE FUNÇÕES */
 int* sum_binary  (int** num1, int** num2, int num1Len, int num2Len);
 int* sub_binary  (int** num1, int** num2, int num1Len, int num2Len);
-int* mult_binary (int** num1, int** num2, int num1Len, int num2Len);
+int* mult_binary (int** num1, int** num2, int num1Len, int num2Len, int* productLen);
 int bin_to_dec(int** num, int numLen);
 int* pow_binary (int** base, int** exp, int baseLen, int expLen);
 
@@ -72,8 +72,7 @@ int main ()
                 printf("* ");
                 num2Len = get_binary(&num2);
 
-                totalLen = num1Len > num2Len ? num1Len : num2Len;
-                total = mult_binary(&num1, &num2, num1Len, num2Len);
+                total = mult_binary(&num1, &num2, num1Len, num2Len, &totalLen);
                 // print ta errado
                 break;
 
@@ -92,10 +91,7 @@ int main ()
                 num1Len = get_binary(&num1);
                 totalLen = num1Len;
 
-                if (num1[0] == 1)
-                    total = complement(&num1, num1Len);
-                else
-                    total = num1;
+                total = complement(&num1, num1Len);
                 break;
 
             case 9: // Binário para Decimal
@@ -128,8 +124,7 @@ int main ()
                 // free memoria
                 exit(1);
         }
-        if (total != NULL)
-            printBin(&total, totalLen);
+        printBin(&total, totalLen);
     }
     return 0;
 }
@@ -219,8 +214,6 @@ int* sum_binary (int** num1, int** num2, int num1Len, int num2Len)
         return NULL;
     }
 
-    printf("soma retornou ");
-    printBin(&total, totalLen); printf("\n");
     return total;
 }
 
@@ -300,33 +293,53 @@ int* sub_binary (int** num1, int** num2, int num1Len, int num2Len)
  * Multiplicar todos os numeros como sendo positivos
  * fazer o complemento doproduto se necessário, seguindo rega de sinal
  */
-int* mult_binary (int** num1, int** num2, int num1Len, int num2Len) {
+int* mult_binary (int** num1, int** num2, int num1Len, int num2Len, int* productLen) {
 
-    int dec = bin_to_dec(num2, num2Len);
+    int switchSign = 0;
+
+    if ((*num1)[0] != (*num2)[0])
+        switchSign = 1;
+
+    if(bin_to_dec(num2, num2Len) == 1 || bin_to_dec(num1, num1Len) == 1)
+        return *num1;
+
+    /* Utiliza somente números positivos na multiplicação */
+    if ((*num2)[0] == 1)
+        *num2 = complement(num2, num2Len);
+    if ((*num1)[0] == 1)
+        *num1 = complement(num1, num1Len);
+
+
     int* total;
-    int totalLen = num1Len * 2;
     int j, k;
-    total = calloc (totalLen, sizeof(int));
+    int totalLen = num1Len * 2;
+    int dec = bin_to_dec(num2, num2Len);
 
-    for(int i = 0; i < dec; i++) {
+    total = calloc(totalLen, sizeof(int));
+
+    /* Valor positivo */
+    //printBin(num1, num1Len); printf(" * ");   printBin(num2, num2Len); printf(" = ");
+    for(int i = 0; i < dec; i++)
         total = sum_binary(&total, num1, totalLen, num1Len);
-    }
 
-    // remove leading zeros
+    //printBin(&total, totalLen); printf(" = ");
+
+    //Remove zeros que ficam "sobrando" no começo do número
     for (j = 0; j < totalLen; j++)
         if (total[j] != 0)
             break;
     j--;
 
-    for (k = 0; j < totalLen; k++, j++) {}
+    for (k = 0; j < totalLen; k++, j++)
         total[k] = total[j];
 
-    /*
-     * for (int i = 0; i < k; i++) 
-     *      printf("[%d]: &d  ", i, total[i])
-     */
-    
     total = realloc(total, k * sizeof(int));
+
+    /*APlica regra de sinais, se necessário*/
+    if (switchSign == 1)
+        total = complement(&total, k);
+
+    *productLen = k;
     return total;
 }
 
@@ -370,7 +383,7 @@ int* pow_binary (int** base, int** exp, int baseLen, int expLen)
     while ( expo-- > 0) {
         printBin(&total, baseLen); printf(" * ");printBin(base, baseLen); printf(" = ");
 
-        total = mult_binary(base, &total, baseLen, totalLen);
+        //total = mult_binary(base, &total, baseLen, totalLen);
         totalLen = baseLen * 2;
 
         printBin(&total, totalLen); printf("\n");
