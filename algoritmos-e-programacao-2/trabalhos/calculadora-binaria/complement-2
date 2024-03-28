@@ -15,7 +15,7 @@
 int* sum_binary  (int** num1, int** num2, int num1Len, int num2Len);
 int* sub_binary  (int** num1, int** num2, int num1Len, int num2Len);
 int* mult_binary (int** num1, int** num2, int num1Len, int num2Len);
-int bin_to_hex(int** num, int numLen);
+int bin_to_dec(int** num, int numLen);
 
 void printBin  (int** bin, int len);
 int  printMenu (void);
@@ -89,13 +89,28 @@ int main ()
                 // free memoria
                 exit(1);
 
-            case 9: // complemento
+            case 9: // Binário para Decimal
                 num1Len = get_binary(&num1);
                 totalLen = num1Len;
-                int hex;
-                hex = bin_to_hex(&num1, num1Len);
-                printf("HeX: %d\n", hex);
+
+                int dec;
+                dec = bin_to_dec(&num1, num1Len);
+                printf("Decimal: %d\n", dec);
                 break;
+
+            case 10: // Binário para Hexadecimal
+                num1Len = get_binary(&num1);
+                totalLen = num1Len;
+
+                dec = bin_to_dec(&num1, num1Len);
+                printf("Hexadecimal: %x\n", dec);
+
+            case 11: // Binário para Hexadecimal
+                num1Len = get_binary(&num1);
+                totalLen = num1Len;
+
+                dec= bin_to_dec(&num1, num1Len);
+                printf("Octal: %o\n", dec);
         }
         if (total != NULL)
             printBin(&total, totalLen);
@@ -313,7 +328,7 @@ int* mult_binary (int** num1, int** num2, int num1Len, int num2Len) {
     return total;
 }
 
-int bin_to_hex(int** num, int numLen)
+int bin_to_dec(int** num, int numLen)
 {
     int dec = 0;                // Valor decimal
     int flipSign = 0;           // 0- Sinal NÃO precisa ser alterado, 1- Sinal precisa ser alterado
@@ -337,4 +352,11 @@ int bin_to_hex(int** num, int numLen)
         return (dec * (-1));
 
     return dec;
+}
+
+int bin_to_hex(int decimal)
+{
+    printf("%d -> %x \n", decimal, decimal);
+    printf("\n");
+    return 0;
 }
