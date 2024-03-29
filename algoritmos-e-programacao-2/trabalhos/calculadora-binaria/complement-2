@@ -15,8 +15,10 @@
 int* sum_binary  (int** num1, int** num2, int num1Len, int num2Len);
 int* sub_binary  (int** num1, int** num2, int num1Len, int num2Len);
 int* mult_binary (int** num1, int** num2, int num1Len, int num2Len, int* productLen);
+int* div_binary (int** num1, int** num2, int num1Len, int num2Len, char opt);
 int bin_to_dec(int** num, int numLen);
 int* pow_binary (int** base, int** pow, int baseLen, int powLen, int* resultLen);
+int* fact_binary(int** base, int baseLen, int* printlLen);
 
 void printBin  (int** bin, int len);
 int  printMenu (void);
@@ -64,7 +66,6 @@ int main ()
                 totalLen = num1Len > num2Len ? num1Len : num2Len;
 
                 total = sub_binary(&num1, &num2, num1Len, num2Len);
-                printBin(&total, totalLen);
                 break;
 
             case 3:
@@ -73,12 +74,23 @@ int main ()
                 num2Len = get_binary(&num2);
 
                 total = mult_binary(&num1, &num2, num1Len, num2Len, &totalLen);
-                // print ta errado
                 break;
 
-            case 4: printf("Erro"); break;
+            case 4:
+                num1Len = get_binary(&num1);
+                printf("/ ");
+                num2Len = get_binary(&num2);
 
-            case 5: printf("Erro"); break;
+                total = div_binary(&num1, &num2, num1Len, num2Len, 'q');
+                break;
+
+            case 5: printf("Erro");
+                num1Len = get_binary(&num1);
+                printf("/ ");
+                num2Len = get_binary(&num2);
+
+                total = div_binary(&num1, &num2, num1Len, num2Len, 'r');
+                break;
 
             case 6:
                 num1Len = get_binary(&num1);
@@ -92,6 +104,11 @@ int main ()
                 totalLen = num1Len;
 
                 total = complement(&num1, num1Len);
+                break;
+
+            case 8: // fatorial
+                num1Len = get_binary(&num1);
+                total = fact_binary(&num1, num1Len, &totalLen);
                 break;
 
             case 9: // Binário para Decimal
@@ -124,6 +141,7 @@ int main ()
                 // free memoria
                 exit(1);
         }
+        if (total != NULL)
         printBin(&total, totalLen);
     }
     return 0;
@@ -260,28 +278,34 @@ void printBin (int** bin, int len)
 int* complement (int **bin, int binLen)
 {
     int* auxBin;    // Binário que representa +1 (01 em comp. 2)
+    int* result = calloc(binLen, sizeof(int));
 
     for (int i = 0; i < binLen; i++)
-        (*bin)[i] = (*bin)[i] == 0 ? 1 : 0;
+        result[i] = (*bin)[i] == 0 ? 1 : 0;
 
     auxBin = calloc(2 , sizeof(int));
     auxBin[0] = 0;
     auxBin[1] = 1;
 
-    *bin = sum_binary(bin, &auxBin, binLen, 2);
-    return *bin;
+    result = sum_binary(&result, &auxBin, binLen, 2);
+    return result;
 }
 
 int* sub_binary (int** num1, int** num2, int num1Len, int num2Len)
 {
     int* total = NULL;
+    int* addend = *num2;
 
-    *num2 = complement(num2, num2Len);
-    total = sum_binary(num1, num2, num1Len, num2Len);
+    for (int i = 0; i < num2Len; i++)
+        addend[i] = (*num2)[i];
+
+    addend = complement(&addend, num2Len);
+
+    total = sum_binary(num1, &addend, num1Len, num2Len);
 
     // Previne overflow
-    if (   ((*num1)[0] == 0 && (*num2)[0] == 0 && total[0] == 1)
-           || ((*num1)[0] == 1 && (*num2)[0] == 1 && total[0] == 0) ) {
+    if (   ((*num1)[0] == 0 && addend[0] == 0 && total[0] == 1)
+           || ((*num1)[0] == 1 && addend[0] == 1 && total[0] == 0) ) {
         printf("ERRO DE OVERFLOW: Estes números não podem ser somados no sistema de representação de complemento de 2. Por favor, insira números com mais bits.");
         return NULL;
     }
@@ -296,12 +320,24 @@ int* sub_binary (int** num1, int** num2, int num1Len, int num2Len)
 int* mult_binary (int** num1, int** num2, int num1Len, int num2Len, int* productLen) {
 
     int switchSign = 0;
+    int totalLen = num1Len * 2;
+    int* total = total = calloc(totalLen, sizeof(int));
 
     if ((*num1)[0] != (*num2)[0])
         switchSign = 1;
 
+    if(bin_to_dec(num2, num2Len) == 0)
+    {
+        total[totalLen - 1] = 1;
+        *productLen = totalLen;
+        return total;
+    }
+
     if(bin_to_dec(num2, num2Len) == 1 || bin_to_dec(num1, num1Len) == 1)
+    {
+        *productLen = num1Len;
         return *num1;
+    }
 
     /* Utiliza somente números positivos na multiplicação */
     if ((*num2)[0] == 1)
@@ -310,12 +346,9 @@ int* mult_binary (int** num1, int** num2, int num1Len, int num2Len, int* product
         *num1 = complement(num1, num1Len);
 
 
-    int* total;
     int j, k;
-    int totalLen = num1Len * 2;
-    int dec = bin_to_dec(num2, num2Len);
 
-    total = calloc(totalLen, sizeof(int));
+    int dec = bin_to_dec(num2, num2Len);
 
     /* Valor positivo */
     //printBin(num1, num1Len); printf(" * ");   printBin(num2, num2Len); printf(" = ");
@@ -396,4 +429,63 @@ int* pow_binary (int** base, int** pow, int baseLen, int powLen, int* resultLen)
         return complement(&total, totalLen);
     else
         return total;
+}
+
+int* fact_binary(int** base, int baseLen, int* printlLen)
+{
+
+    int* aux = calloc(2, sizeof(int));
+    aux[0] = 0;
+    aux[1] = 1;
+    int* counter = *base;   // All integers below the base
+
+    counter = sub_binary(&counter, &aux, baseLen, 2);
+
+    int* partial = *base;
+    int totalLen = baseLen;
+    int* total = calloc(baseLen*2, sizeof(int));
+
+    for (int i = 0; i <= bin_to_dec(base, baseLen); i++) {
+        partial = mult_binary(&partial, &counter, totalLen, baseLen, &totalLen);
+        total = sum_binary(&total, &partial, totalLen, totalLen);
+        counter = sub_binary(&counter, &aux, baseLen, 2);
+    }
+
+    printf("fatorial: ");
+    printBin(&partial, totalLen);
+    printf("\n");
+    return NULL;
+}
+
+int* div_binary (int** num1, int** num2, int num1Len, int num2Len, char opt) // divisão e resto
+{
+    int* aux = calloc(2, sizeof(int));
+    aux[0] = 0;
+    aux[1] = 1;
+
+    int* quoc = calloc(2, sizeof(int));
+    aux[0] = 0;
+    aux[1] = 1;
+
+    int remainLen = num1Len > num2Len ? num1Len : num2Len;
+    int* remain = *num1;
+    int q = 0;
+
+    // enquanto resto maior que divisor
+    while(bin_to_dec(&remain, remainLen) >= bin_to_dec(num2, num2Len)) {
+        printBin(num1, num1Len); printf(" - "); printBin(num2, num2Len); printf(" = ");
+        remain = sub_binary(&remain, num2, remainLen, num2Len);
+        printBin(&remain, remainLen);
+        q++;
+        printf("\n");
+    }
+
+    printf("remain: ");
+    printBin(&remain, remainLen);
+    printf("\n quoc: %d", q);
+
+    if (opt == 'r')
+        return 0;  // total is actually the remain
+    else if (opt == 'q')
+        return 0;
 }
