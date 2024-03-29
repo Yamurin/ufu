@@ -81,13 +81,17 @@ int main ()
                 printf("/ ");
                 num2Len = get_binary(&num2);
 
+                totalLen = num1Len > num2Len ? num1Len : num2Len;
+
                 total = div_binary(&num1, &num2, num1Len, num2Len, 'q');
                 break;
 
-            case 5: printf("Erro");
+            case 5:
                 num1Len = get_binary(&num1);
                 printf("/ ");
                 num2Len = get_binary(&num2);
+
+                totalLen = num1Len;
 
                 total = div_binary(&num1, &num2, num1Len, num2Len, 'r');
                 break;
@@ -463,29 +467,19 @@ int* div_binary (int** num1, int** num2, int num1Len, int num2Len, char opt) // 
     aux[0] = 0;
     aux[1] = 1;
 
-    int* quoc = calloc(2, sizeof(int));
-    aux[0] = 0;
-    aux[1] = 1;
+    int* quoc = calloc(num1Len, sizeof(int));
 
     int remainLen = num1Len > num2Len ? num1Len : num2Len;
     int* remain = *num1;
-    int q = 0;
 
     // enquanto resto maior que divisor
     while(bin_to_dec(&remain, remainLen) >= bin_to_dec(num2, num2Len)) {
-        printBin(num1, num1Len); printf(" - "); printBin(num2, num2Len); printf(" = ");
         remain = sub_binary(&remain, num2, remainLen, num2Len);
-        printBin(&remain, remainLen);
-        q++;
-        printf("\n");
+        quoc = sum_binary(&quoc, &aux, num1Len, 2);
     }
 
-    printf("remain: ");
-    printBin(&remain, remainLen);
-    printf("\n quoc: %d", q);
-
     if (opt == 'r')
-        return 0;  // total is actually the remain
+        return remain;  // total is actually the remain
     else if (opt == 'q')
-        return 0;
+        return quoc;
 }
