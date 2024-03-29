@@ -1,500 +1,553 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <locale.h>
+#include <locale.h>  // Biblioteca para exibir caracteres do PT-BR
 
-#define TAM_STRING 256
-
-typedef struct {
-    char* codigo;
-    char* nome;
-    char* especie;
-    float peso;
-    float altura;
-} info_animal;
+#define STR_BUF 1024
 
 /* PROTÓTIPOS DE FUNÇÕES */
-void
-editarNomesCatalogo        (char*** catalogo,  int qtd_setor);
-char** alterarCatalogo     (char*** catalogo,  int qtd_setor, char c, int i_setor);
-info_animal* alterarSetor  (info_animal** zoo, int tam_zoo, int tam_setor, char c, int i_setor);
+int* sum_binary     (int** num1, int** num2, int num1Len, int num2Len);
+int* sub_binary     (int** num1, int** num2, int num1Len, int num2Len);
+int* mult_binary    (int** num1, int** num2, int num1Len, int num2Len, int* productLen);
+int* div_binary     (int** num1, int** num2, int num1Len, int num2Len, char opt);
+int* pow_binary     (int** base, int** pow,  int baseLen, int powLen, int* resultLen);
+int  bin_to_dec     (int** num, int numLen);
 
-void adicionarAnimal       (info_animal** zoo, int qtd_jaula, int qtd_animal);
-void animalMaisPesado      (info_animal** zoo, char** catalogo, int qtd_setor, int tam_setor);
-
-void printZoo              (info_animal* zoo,  char** catalogo, int qtd_setor, int qtd_jaula, int qtd_animal);
-int  printMenu             (void);
-
-void conferirMalloc        (void *ptr);
-void continuar             (void);
+void printMenu      (void);
+void printBin       (int** bin, int len);
+int* complement     (int **bin, int binLen);
+int  get_binary     (int **bin);
+void check_malloc   (void* ptr);
 
 int main ()
 {
-    setbuf(stdout, NULL);
-    setlocale (LC_ALL, "Portuguese");
+    setlocale(LC_ALL, "Portuguese");
 
-    info_animal* zoo;
-    char** catalogo;
-    int qtd_setor, qtd_jaula, qtd_animal;
-    int tam_setor, tam_zoo;
-    int i_setor;
+    printf("------- CALCULADORA BINÁRIA --------\n");
+    printf("A Calculadora utiliza a representação binária de /'Complemento de Dois/'.\n");
+    printf("Por favor, insira os números seguindo essa representação.\nOs resultados e todas as operações também seguem esta notação.\n");
 
-    printf("Bem-vindo(a) ao Administrador de Zoológicos v1.0!\n Disciplina: Algoritmos e Programação II \t Discente: Rayane Reis Mota - 12311BSI233\n");
-    printf("\t----------------------------------------------------------------------\t\n\n");
+    int* num1  = NULL;
+    int* num2  = NULL;
+    int* total = NULL;
+    int num1Len, num2Len;         // Quantidade de dígitos nos operadores e no resultado.
+    int totalLen, option;
 
-    // Coletar as dimensões do Zoológico.
-    do {
-        printf("[-] Insira o número de setores, de jaulas e de animais para começar:\n");
-        scanf ("%d %d %d", &qtd_setor, &qtd_jaula, &qtd_animal);
+    while (1) {
+        printMenu();
+        scanf("%d", &option);
+        printf("Digite um número (Notação em complemento de 2): \n ");
+        num1Len = get_binary(&num1);
 
-        tam_zoo   = qtd_setor * qtd_jaula * qtd_animal;
-        tam_setor = qtd_jaula * qtd_animal;
+        switch (option)
+        {
+            case 1:         // Adição
+                printf("+");
+                num2Len = get_binary(&num2);
 
-        if (tam_zoo <= 0 || tam_setor <= 0)
-            printf("[!] Você deve inserir números positivos maiores que zero!\n\n");
-    } while (tam_zoo <= 0 || tam_setor <= 0);
+                totalLen = num1Len > num2Len ? num1Len : num2Len;
+                total = sum_binary(&num1, &num2, num1Len, num2Len);
 
-    continuar();
-
-    // Alocar um array contíguo, representando a estrutura dinâmica de três dimensões que contém todos os animais.
-    zoo = calloc (qtd_setor * qtd_jaula * qtd_animal, sizeof (info_animal));
-    conferirMalloc (zoo);
-    printf("[>] Zoológico alocado com espaço para %d animais.\n\n", qtd_setor * qtd_jaula * qtd_animal);
-
-    // Alocar um array bidimensional, representando os nomes de cada setor, cujos setores estão na mesma ordem do vetor zoo[].
-    catalogo = calloc (qtd_setor, sizeof (char *));
-    conferirMalloc (catalogo);
-    for (int i = 0; i < qtd_setor; i++)
-        catalogo[i] = calloc (TAM_STRING + 1, sizeof (char));
-
-    while(1) {
-        setbuf(stdout, NULL);
-    switch (printMenu ())
-    {
-        case 1:
-            editarNomesCatalogo(&catalogo, qtd_setor);
-            break;
-
-        case 2:
-            adicionarAnimal(&zoo, qtd_jaula, qtd_animal);
-            break;
-
-        case 3:
-            animalMaisPesado(&zoo, catalogo, qtd_setor, tam_setor);
-            break;
-
-        case 4:
-            zoo      = alterarSetor(&zoo, tam_zoo, tam_setor, 'a', 0);
-            catalogo = alterarCatalogo(&catalogo, qtd_setor, 'a', i_setor);
-
-            qtd_setor++;
-            break;
-
-        case 5:
-            if (qtd_setor == 1)
-            {
-                printf("[!] Você não pode remover o único setor do Zoológico.\n");
+                printf(" = ");
+                if (total != NULL)
+                    printBin(&total, totalLen);
                 break;
-            }
 
-            do
-            {
-                printf("Insira o número do setor a ser removido: ");
-                scanf("%d", &i_setor);
-            } while (i_setor > qtd_setor || i_setor < 0);
+            case 2:         // Subtração
+                printf("- ");
+                num2Len = get_binary(&num2);
 
+                totalLen = num1Len > num2Len ? num1Len : num2Len;
+                total = sub_binary(&num1, &num2, num1Len, num2Len);
 
-            zoo      = alterarSetor(&zoo, tam_zoo, tam_setor, 'r', i_setor);
-            catalogo = alterarCatalogo(&catalogo, qtd_setor, 'r', i_setor);
+                printf("= ");
+                if (total != NULL)
+                    printBin(&total, totalLen);
+                break;
 
-            qtd_setor--;
-            break;
+            case 3:         // Multiplicação
+                printf("* ");
+                num2Len = get_binary(&num2);
 
-        case 6:
-            printZoo(zoo, catalogo, qtd_setor, qtd_jaula, qtd_animal);
-            break;
+                total = mult_binary(&num1, &num2, num1Len, num2Len, &totalLen);
 
-        case 7:
-            printf("Saindo do sistema...\n");
+                printf("= ");
+                if (total != NULL)
+                    printBin(&total, totalLen);
+                break;
 
-            free(zoo);
+            case 4:         // Quociente
+                printf("/ ");
+                num2Len = get_binary(&num2);
 
-            while(qtd_setor--)
-                free(catalogo[qtd_setor]);
-            free(catalogo);
+                totalLen = num1Len > num2Len ? num1Len : num2Len;
+                total = div_binary(&num1, &num2, num1Len, num2Len, 'q');
 
-            exit(0);
-    } continuar(); }
+                printf("= ");
+                if (total != NULL)
+                    printBin(&total, totalLen);
+                break;
 
+            case 5:         // Resto
+                printf("/ ");
+                num2Len = get_binary(&num2);
+
+                totalLen = num1Len;
+                total = div_binary(&num1, &num2, num1Len, num2Len, 'r');
+
+                printf("= ");
+                if (total != NULL)
+                    printBin(&total, totalLen);
+                break;
+
+            case 6:         // Exponenciação
+                printf("^ ");
+                num2Len = get_binary(&num2);
+
+                total = pow_binary (&num1, &num2, num1Len, num2Len, &totalLen);
+                printf("= ");
+                if (total != NULL)
+                    printBin(&total, totalLen);
+                break;
+
+            case 7:              // Absoluto
+                total = num1;
+                totalLen = num1Len;
+
+                if (num1[0] == 1)
+                    total = complement(&num1, num1Len);
+
+                printf("= ");
+                if (total != NULL)
+                    printBin(&total, totalLen);
+                break;
+
+            case 8:             // Fatorial
+                printf("Não foi possível implementar esta função no programa.\n");
+                /*num1Len = get_binary(&num1);
+                total = fact_binary(&num1, num1Len, &totalLen);*/
+                break;
+
+            case 9:             // Binário para Decimal
+                totalLen = num1Len;
+
+                int dec;
+                dec = bin_to_dec(&num1, num1Len);
+                printf("Decimal: %d\n", dec);
+                break;
+
+            case 10:            // Binário para Hexadecimal
+                totalLen = num1Len;
+
+                dec = bin_to_dec(&num1, num1Len);
+                printf("Hexadecimal: %x\n", dec);
+                break;
+
+            case 11:            // Binário para Octal
+                totalLen = num1Len;
+
+                dec= bin_to_dec(&num1, num1Len);
+                printf("Octal: %o\n", dec);
+                break;
+
+            case 12:              // Sair
+                printf("Saindo do sistema...");
+                free(num1);
+                free(num2);
+                free(total);
+                exit(1);
+
+            default:
+                printf("Opção inválida.\n");
+                break;
+        }
+        printf("\nContinuar... ");
+        getchar();
+    }
+    return 0;
 }
 
 /*
- * IMPRIMIR TODOS OS ANIMAIS DO ZOOLÓGICO.
- *      Acessa cada struct (animal) dentro do vetor zoo[], e imprime na tela seus respectivos dados.
- *      Parâmetros: Vetor com todos os animais, vetor com todos os nomes dos setores, dimensões do zoológico.
- * */
-void printZoo (info_animal* zoo, char** catalogo, int qtd_setor, int qtd_jaula, int qtd_animal)
+ *  CONVERTE UMA STRING EM UM VETOR COM DÍGITOS CORRESPONDENTES.
+ *  Parâmetro: String digitada pelo usuário.
+ *  Ação:      Aloca dinamicamente um vetor com todos os dígitos da string, representando um número binário.
+ *  Retorna:   Número de dígitos do número binário (vetor) alocado.
+ */
+int get_binary (int **bin)
 {
-    int idx;
-    for (int i_setor = 0; i_setor < qtd_setor; i_setor++)
-    {
-        printf("\t SETOR %d: ", i_setor + 1);
-        if(strlen(catalogo[i_setor]) == 0)
-            printf("- Sem nome - \t \n");
-        else
-            printf("\"%s\" \t \n", catalogo[i_setor]);
-
-        printf("-------------------------------------------------\n");
-
-        for (int i_jaula = 0; i_jaula < qtd_jaula; i_jaula++)
-        {
-            idx = (i_setor * qtd_jaula * qtd_animal + i_jaula * qtd_jaula);     // Aritmética do index para acessar cada elemento dentro do vetor.
-            printf("[-] %dº jaula: \n", i_jaula + 1);
-
-            if (zoo[idx].codigo == NULL)
-            {
-                printf("A jaula está vazia.\n\n");
-                continue;
-            }
-
-            for (int i_animal = 0; i_animal < qtd_animal; i_animal++)
-            {
-                idx += i_animal;
-
-                if (zoo[idx].codigo != NULL)
-                {
-                    printf("%d. %s (Cód.: %s): ", i_animal + 1, zoo[idx].nome, zoo[idx].codigo);
-                    printf("%s \t %.2f quilos\t %.2f metros\n", zoo[idx].especie, zoo[idx].peso, zoo[idx].altura);
-                } else {
-                    printf("%d. Jaula vazia.", i_animal + 1);
-                }
-                printf("\n");
-            }
-        }
-        printf("\n");
-    }
-}
-
-/*
- * ADICIONAR UM ANIMAL AO VETOR ZOO[].
- *      Preenche os dados da struct (animal) na primeira posição vazia da jaula indicada, somente se a jaula tiver um espaço vago.
- *      Parâmetros: Endereço do vetor com todos os animais, dimensões do zoológico.
- * */
-void adicionarAnimal (info_animal **zoo, int qtd_jaula, int qtd_animal)
-{
-    int i_setor, i_jaula, i_animal, idx;
-
-    printf("\t-  Adicionar novo animal  -\t\n\n");
-
-    do {
-        printf("[>] Informe o número do setor e o número da jaula do animal: ");
-        scanf ("%d %d", &i_setor, &i_jaula);
-
-        if (i_setor <= 0 || i_jaula <= 0)
-            printf("[!] Você está tentando acessar uma jaula e/ou setor que não existe!\n\n");
-        } while (i_setor <= 0 || i_jaula <= 0);
-
-    // Conversão da entrada humana em index para navegação no zoo[].
-    i_animal = 0;
-    i_jaula -= 1;
-    i_setor -= 1;
-
-    idx = i_setor * qtd_jaula * qtd_animal + i_jaula * qtd_jaula;       // Aritmética do index para acessar cada elemento dentro do vetor.
-
-    // Localiza a primeira vaga não nula na jaula indicada.
-    while ((*zoo)[idx + i_animal].codigo != NULL)
-    {
-        i_animal++;
-        if (i_animal == qtd_animal)
-        {
-            printf("[!] Esta jaula já está com a sua capacidade máxima de animais.\n");
-            return;
-        }
-    }
-
-    idx += i_animal;
-    printf("[>] Insira os dados do animal na %dº vaga da %dº Jaula do Setor %d.\n\n", i_animal+1, i_jaula+1, i_setor+1);
-
-    setbuf (stdin, NULL);
-
-    printf("Código: ");
-    (*zoo)[idx].codigo = malloc (TAM_STRING);
-    conferirMalloc ((*zoo)[idx].codigo);
-    fgets ((*zoo)[idx].codigo, TAM_STRING, stdin);
-    (*zoo)[idx].codigo[ strcspn((*zoo)[idx].codigo, "\n") ] = 0;         // Remove '\n' do final da string.
-    setbuf (stdin, NULL);
-
-    printf("Nome: ");
-    (*zoo)[idx].nome = malloc (TAM_STRING);
-    conferirMalloc ((*zoo)[idx].nome);
-    fgets ((*zoo)[idx].nome, TAM_STRING, stdin);
-    (*zoo)[idx].nome[ strcspn((*zoo)[idx].nome, "\n") ] = 0;            // Remove '\n' do final da string.
-    setbuf (stdin, NULL);
-
-    printf("Espécie: ");
-    (*zoo)[idx].especie = malloc (TAM_STRING);
-    conferirMalloc ((*zoo)[idx].especie);
-    fgets ((*zoo)[idx].especie, TAM_STRING, stdin);
-    (*zoo)[idx].especie[ strcspn((*zoo)[idx].especie, "\n") ] = 0;       // Remove '\n' do final da string.
-
-    printf("Peso (maior que 0kg): ");
-    do {
-        setbuf (stdin, NULL);
-        scanf ("%f", &((*zoo)[idx].peso));
-    } while ((*zoo)[idx].peso <= 0);
-
-    printf("Altura (maior que 0m): ");
-    do {
-        setbuf (stdin, NULL);
-        scanf ("%f", &((*zoo)[idx].altura));
-    } while ((*zoo)[idx].altura <= 0);
-
-    printf("\n[!] %s adicionado(a) com sucesso.\n", (*zoo)[idx].nome);
-    return;
-}
-
-/*
- * ENCONTRAR O ANIMAL MAIS PESADO EM UM SETOR ESCOLHIDO.
- *      Coleta uma entrada em string e localiza o índice do primeiro setor de nome igual. Encontra o animal de maior peso no setor indicado.
- *      Parâmetros: Endereço do vetor com todos os animais, vetor com todos os nomes dos setores, dimensões do zoológico.
- * */
-void animalMaisPesado(info_animal **zoo, char **catalogo, int qtd_setor, int tam_setor)
-{
-    int i_setor = 0;                            // índice correspondente ao nome pesquisado
-    double pesado_peso = 0;
-    char pesado_nome[TAM_STRING];
-    char pesquisa[TAM_STRING];
-
-    printf("\t-  Procurar animal mais pesado de um Setor  -\t\n\n");
-    printf("Insira o nome do setor onde pesquisar qual o animal mais pesado (Exatamente igual): ");
-    setbuf (stdin, NULL);
-
-    fgets(pesquisa, TAM_STRING, stdin);
-    pesquisa[strcspn(pesquisa, "\n")] = 0;     // Remove '\n' do final da string.
-
-    if(strcmp(pesquisa, "") == 0)
-    {
-        printf("[!] Erro: Campo de pesquisa em branco.\n");
-        return;
-    }
-
-    // Compara a string pesquisada com cada índice no Catálogo.
-    while (strcmp(pesquisa, catalogo[i_setor]) != 0)
-    {
-        if(i_setor < qtd_setor)
-            i_setor++;
-    }
-
-    if (i_setor == qtd_setor)
-    {
-        printf("[!] O nome inserido não foi encontrado no Catálogo de Setores.\n");
-        return;
-    }
-
-    // Aritmética para o primeiro elemento do setor informado (na primeira jaula).
-    i_setor *= tam_setor;
-
-    if ((*zoo)[i_setor].peso == 0)
-    {
-        printf("[!] O setor \"%s\" está vazio.\n", pesquisa);
-        return;
-    }
-
-    // Percorre todos os animais da primeira à última posição do setor.
-    for (int i_animal = i_setor; i_animal < (i_setor + tam_setor); i_animal++)
-    {
-        if ((*zoo)[i_animal].peso > pesado_peso)
-        {
-            pesado_peso = (*zoo)[i_animal].peso;
-            strcpy(pesado_nome, (*zoo)[i_animal].nome);
-        }
-    }
-
-    printf("[>] O animal mais pesado do Setor \"%s\" é o(a) %s (%0.2f kg).\n\n", pesquisa, pesado_nome, pesado_peso);
-    return;
-}
-
-/*
- * VISUALIZAR OU EDITAR STRINGS DO CATÁLOGO.
- *      Preenche o catálogo a partir do último nome vazio. Ou imprime o nome de todos os setores.
- *      Parâmetros: Endereço do vetor de strings (Catálogo), dimensões do zoológico.
- * */
-void editarNomesCatalogo(char*** catalogo, int qtd_setor)
-{
-    int escolha, nomeTam;
-
-    printf("\t-  Catálogo de Setores  -\t\n\n");
-    printf("1. Adicionar nomes à todos os setores sem nome.\n");
-    printf("2. Visualizar nomes no Catálogo.\n");
-    printf("3. Voltar.\n-> ");
-
-    scanf("%d", &escolha);
-
-    printf("\n");
-
-    if(escolha == 3)
-        return;
-
-    // Imprimir nome de todos os setores.
-    if(escolha == 2)
-    {
-        for (int i = 0; i < qtd_setor; i++)
-        {
-            printf("Setor %d:  ", i + 1);
-            if(strlen ((*catalogo)[i]) == 0)
-                printf("(Sem nome)\n");
-            else
-                printf("%s\n", (*catalogo)[i]);
-        }
-        printf("\n");
-        return;
-    }
-
-    nomeTam = strlen ((*catalogo)[qtd_setor - 1]);              // Comprimento do nome do último setor no Catálogo.
-
-    // Preencher catálogo, a partir do primeiro elemento vazio.
-    if(nomeTam > 0)
-        printf("[!] Todos os setores estão preenchidos, você não pode adicionar mais nenhum.\n");
-    else {
-        for (int i = 0; i < qtd_setor; i++)                     // Percorre o Catálogo em ordem, porém edita somente nomes vazios.
-        {
-            nomeTam = strlen ((*catalogo)[i]);
-            if(nomeTam == 0)
-            {
-                printf("\n[-] Nomear Setor %d: ", i+1);
-                setbuf(stdin, NULL);
-                fgets((*catalogo)[i], 256, stdin);
-
-                int char_aux = strcspn((*catalogo)[i], "\n");
-                (*catalogo)[i][char_aux] = 0;                                  // Remove '\n' do final da string.
-                printf("[>] Setor %d nomeado para \"%s\".\n", i+1, (*catalogo)[i]);
-            } else {
-                continue;
-            }
-        }
-    }
-    
-    return;
-}
-
-/*
- * REALOCAR O ZOOLÓGICO PARA CONTER UM SETOR A MAIS OU UM A MENOS.
- *      Aloca um novo endereço na memória para um zoológico com maior ou menor capacidade. Reordena o vetor zoo[] ao excluir um setor.
- *      Parâmetros: Endereço do vetor com todos os animais, dimensões do zoológico,
- *                  caractere 'a' para "Adicionar Setor",
- *                  caractere 'r' para "Remover Setor",
- *                  índice do setor a ser removido.
- *      Retorna: Endereço na memória com espaço para mais N animais.
- * */
-info_animal* alterarSetor(info_animal** zoo, int tam_zoo, int tam_setor, char c, int i_setor)
-{
-    info_animal* novo_zoo;
-    novo_zoo = *zoo;
-
-    // Remover setor e reordenar setores restantes.
-    if(c == 'r')
-    {
-        i_setor = (i_setor - 1) * tam_setor;        // Conversão da entrada humana em index para navegação no zoo[].
-
-        for (int i  = i_setor; i < tam_zoo; i++)
-        {
-            novo_zoo[i] = novo_zoo[i + tam_setor];
-            novo_zoo = realloc(*zoo, (tam_zoo - tam_setor) * sizeof(info_animal));
-            conferirMalloc(novo_zoo);
-        }
-
-        return novo_zoo;
-    }
-    // Adicionar setor. .
-    else if(c == 'a')
-    {
-        novo_zoo = realloc(*zoo, (tam_zoo + tam_setor) * sizeof(info_animal));
-        conferirMalloc(novo_zoo);
-
-        return novo_zoo;
-    }
-}
-
-/*
- * REALOCAR O CATÁLOGO PARA CONTER UM SETOR A MAIS OU UM A MENOS.
- *      Aloca um novo endereço na memória para um catálogo com maior ou menor capacidade. Reordena a ordem dos nomes ao excluir um setor.
- *      Parâmetros: Endereço do vetor de strings (Catálogo), e os memos da função editarNomesCatalogo(0).
- *      Retorna: Ponteiro para um endereço na memória com mais N espaços para palavras.
- * */
-char** alterarCatalogo(char*** catalogo, int qtd_setor, char c, int i_setor)
-{
-    char** novo_catalogo;
-    int tam_catalogo;
-
-    novo_catalogo = *catalogo;
-    tam_catalogo  = qtd_setor * sizeof(char *);
-
-    // Remover nome do catálogo e reordenar nomes restantes.
-    if(c == 'r')
-    {
-        if(qtd_setor == 1)
-        {
-            printf("[!] Você não pode remover o único setor do Zoológico.");
-            return *catalogo;
-        }
-
-        for (int i = i_setor - 1; i < qtd_setor-1; i++)
-            strcpy(novo_catalogo[i], novo_catalogo[i + 1]);
-        novo_catalogo = realloc (*catalogo, tam_catalogo - sizeof(char *));
-        conferirMalloc(novo_catalogo);
-        printf("O Setor %d foi removido do Zoológico.\n", i_setor);
-        return novo_catalogo;
-    }
-    // Adicionar espaço e título para mais um nome no catálogo.
-    else if(c == 'a')
-    {
-        novo_catalogo = realloc(*catalogo, tam_catalogo + sizeof(char *));
-        conferirMalloc(novo_catalogo);
-        novo_catalogo[qtd_setor] = malloc(TAM_STRING);
-        conferirMalloc(novo_catalogo);
-
-        printf("[-] Insira o título do novo setor: ");
-        setbuf(stdin, NULL);
-        fgets(novo_catalogo[qtd_setor], TAM_STRING, stdin);
-        printf("[>] Setor \"%s\" adicionado ao Zoológico.\n", novo_catalogo[qtd_setor]);
-
-        return novo_catalogo;
-    }
-}
-
-void continuar(void)
-{
-    printf("Aperte qualquer tecla para continuar...");
+    char binStr[STR_BUF];
     setbuf(stdin, NULL);
-    getchar();
-    system("@cls||clear");     // Limpar a tela do terminal.
+    fgets(binStr, STR_BUF, stdin);
+
+    int binLen = 0;                              // Número de dígitos da entrada
+
+    for (int i = 0; binStr[i] != '\0' && binStr[i] != '\n'; i++) {
+        binLen++;
+        *bin = realloc(*bin, sizeof(int) * binLen);
+        check_malloc(*bin);
+
+        if (*bin == NULL) {
+            printf("Falha ao alocar memória. Reinicie o programa.\n");
+            exit(1);
+        }
+
+        (*bin)[i] = binStr[i] == '1' ? 1 : 0;
+    }
+
+    return binLen;
 }
 
-/* IMPRIMIR AS OPÇÕES AO USUÁRIO. */
-int printMenu(void)
+/*
+ *  FAZ A SOMA BINÁRIA ENTRE DOIS NÚMEROS DE MESMO SINAL
+ *  Parâmetro: Dois números binários (vetores), quantidades de dígitos de cada vetor.
+ *  Ação:      Faz a soma binária, seguindo a notação do complemento de 2 (onde o "carry" do número mais significativo é desprezado).
+ *  Retorna:   Vetor com o resultado da soma binária dos números de parâmetro.
+ */
+int* sum_binary (int** num1, int** num2, int num1Len, int num2Len)
 {
-    printf( "----------  MENU  -------------\n \n");
-    printf("1. Acessar catálogo de setores.\n");
-    printf("2. Inserir animais em uma jaula de um setor. \n");
-    printf("3. Procurar animal mais pesado de um dado setor. \n");
-    printf("4. Inserir um novo setor. \n");
-    printf("5. Remover um setor. \n");
-    printf("6. Visualizar todos os animais do zoológico. \n");
-    printf("7. Sair do sistema. \n");
+    int* total = NULL;
+    int totalLen;
 
-    int i;
-    printf("-> ");
-    scanf  ("%d", &i);
-    printf("\n");
-    return i;
+    int idx1 = num1Len - 1;
+    int idx2 = num2Len - 1;
+
+    int carry  = 0;
+
+    totalLen = num1Len > num2Len ? num1Len : num2Len;           // O resultado tem tantos dígitos quanto o maior numero
+    total = calloc(totalLen, sizeof(int));
+    check_malloc(total);
+
+    for (int i = totalLen - 1; i >= 0; i--) {                   // Despreza o último carry, se houver
+        int auxSum = 0 + carry;
+
+        if (idx1 >= 0) {
+            auxSum += (*num1)[idx1];
+            idx1--;
+        } else {
+            if ((*num1)[0] == 1)
+                auxSum += 1;
+        }
+
+        if (idx2 >= 0) {
+            auxSum += (*num2)[idx2];
+            idx2--;
+        } else {
+            if ((*num2)[0] == 1)
+                auxSum += 1;
+        }
+
+        if (auxSum <= 1) {
+            carry = 0;
+        } else {
+            auxSum = auxSum % 2;                                // Soma o 'carry' ao dígito, mas sem sobrescrever o valor da soma desse mesmo dígito com o próximo
+            carry = 1;
+        }
+
+        total[i] = auxSum;
+    }
+
+    // Previne overflow
+    if (   ((*num1)[0] == 0 && (*num2)[0] == 0 && total[0] == 1)
+           || ((*num1)[0] == 1 && (*num2)[0] == 1 && total[0] == 0) ) {
+        printf("ERRO DE OVERFLOW: Estes números não podem ser somados no sistema de representação de complemento de 2.");
+        printf("Por favor, insira números com mais bits.\n");
+        return NULL;
+    }
+
+    return total;
+}
+
+/*
+ *  IMPRIME AS OPÇÕES DE OPERAÇÕES NA TELA.
+ *  Parâmetro: Nada
+ *  Ação:      Imprime texto na tela.
+ *  Retorna:   Inteiro com o número da opção escolhida pelo usuário.
+ */
+void printMenu (void)
+{
+    printf("\n\nSelecione a operação: ");
+    printf("\n1. Soma \n2. Subtração\n3. Multiplicação\n4. Divisão\n5. Resto\n6. Potência");
+    printf("\n7. Absoluto\n8. Fatorial\n9. Converter binário para decimal");
+    printf("\n10. Converter binário para hexadecimal\n");
+    printf("11. Converter binário para octal\n");
+    printf("=> ");
+}
+
+/*
+ *  PERCORRE O NÚMERO BINÁRIO E O MOSTRA NA TELA DE FORMA CONTÍNUA.
+ */
+void printBin (int** bin, int len)
+{
+    int i = 0;
+    while (i < len) {
+        printf("%d", (*bin)[i]);
+        i++;
+    }
+}
+
+/*
+ *  CALCULA A NEGAÇÃO DE UM NÚMERO BINÁRIO: Inverte os bits e soma +1
+ *  Parâmetro: Vetor com o número binário (no sistema de representação do complemento de 2) a ser convertido
+ *  Ação:      Faz o complemento de 2 do número de entrada: Inverte os bits e soma +1 (em notação de comp. 2: 01)
+ *  Retorna:   Vetor com o número binário complemento (ou seja, com o sinal trocado)
+ */
+int* complement (int **bin, int binLen)
+{
+    int* auxBin;                                    // Binário que representa +1 (01 em comp. 2)
+    int* result = calloc(binLen, sizeof(int));
+    check_malloc(result);
+
+    for (int i = 0; i < binLen; i++)
+        result[i] = (*bin)[i] == 0 ? 1 : 0;
+
+    auxBin = calloc(2 , sizeof(int));
+    check_malloc(auxBin);
+    auxBin[0] = 0;
+    auxBin[1] = 1;
+
+    result = sum_binary(&result, &auxBin, binLen, 2);
+    return result;
+}
+
+/*
+ *  SUBTRAI DOIS NÚMEROS BINÁRIOS: SOMA UM NÚMERO AO COMPLEMENTO DO OUTRO
+ *  Parâmetro: Dois números binários (vetores), quantidades de dígitos de cada vetor.
+ *  Ação:      Se os números têm sinais iguais, soma o primeiro com o inverso do segundo. Senão, faz uma soma normal.
+ *  Retorna:   Vetor com o resultado da subtração binária dos números de parâmetro.
+ */
+int* sub_binary (int** num1, int** num2, int num1Len, int num2Len)
+{
+    int* total = NULL;
+    int* addend = *num2;
+
+    for (int i = 0; i < num2Len; i++)
+        addend[i] = (*num2)[i];
+
+    addend = complement(&addend, num2Len);
+    total = sum_binary(num1, &addend, num1Len, num2Len);
+
+    /* Previne overflow */
+    if (   ((*num1)[0] == 0 && addend[0] == 0 && total[0] == 1)
+           || ((*num1)[0] == 1 && addend[0] == 1 && total[0] == 0) ) {
+        printf("ERRO DE OVERFLOW: Estes números não podem ser somados no sistema de representação de complemento de 2. ");
+        printf("Por favor, insira números com mais bits.\n");
+        return NULL;
+    }
+    return total;
+}
+
+/*
+ *  MULTIPLICA DOIS NÚMEROS BINÁRIOS
+ *  Parâmetro: Dois números binários (vetores), quantidades de dígitos de cada vetor, quantidade de dígitos para ser impressa na resposta.
+ *  Ação:      Multiplica os dois fatores, faz o complemento de "casas" do produto. Utiliza valores positivos e faz a conversão de sinais depois.
+ *  Retorna:   Vetor com o resultado da multiplicação binária dos números de parâmetro.
+ */
+int* mult_binary (int** num1, int** num2, int num1Len, int num2Len, int* productLen) {
+
+    int switchSign = 0;
+    int totalLen = num1Len * 2;
+    int* total = total = calloc(totalLen, sizeof(int));
+    check_malloc(total);
+
+    if ((*num1)[0] != (*num2)[0])
+        switchSign = 1;
+
+    if(bin_to_dec(num2, num2Len) == 0)
+    {
+        total[totalLen - 1] = 1;
+        *productLen = totalLen;
+        return total;
+    }
+
+    if(bin_to_dec(num2, num2Len) == 1 || bin_to_dec(num1, num1Len) == 1)
+    {
+        *productLen = num1Len;
+        return *num1;
+    }
+
+    /* Utiliza somente números positivos na multiplicação */
+    if ((*num2)[0] == 1)
+        *num2 = complement(num2, num2Len);
+    if ((*num1)[0] == 1)
+        *num1 = complement(num1, num1Len);
+
+    int j, k;
+
+    int dec = bin_to_dec(num2, num2Len);
+
+    /* Valor positivo */
+    for(int i = 0; i < dec; i++)
+        total = sum_binary(&total, num1, totalLen, num1Len);
+
+    //Remove zeros que ficam "sobrando" no começo do número
+    for (j = 0; j < totalLen; j++)
+        if (total[j] != 0)
+            break;
+    j--;
+
+    for (k = 0; j < totalLen; k++, j++)
+        total[k] = total[j];
+
+    total = realloc(total, k * sizeof(int));
+    check_malloc(total);
+
+    /*APlica regra de sinais, se necessário*/
+    if (switchSign == 1)
+        total = complement(&total, k);
+
+    *productLen = k;        // variável usada exclusivamente para imprimir o resultado na tela, quando necessário
+    return total;
+}
+
+/*
+ *  CONVERTE UM NÚMERO BINÁRIO PARA DECIMAL
+ *  Parâmetro: Número binário (vetor) a ser convertido, quantidade de dígitos do número.
+ *  Ação:      Para cada posição binária, soma o valor decimal correspondente (1, 2, 4, 8...)
+ *  Retorna:   Inteiro convertido.
+ */
+int bin_to_dec(int** num, int numLen)
+{
+    int dec = 0;                // Valor decimal
+    int flipSign = 0;           // 0- Sinal NÃO precisa ser alterado, 1- Sinal precisa ser alterado
+    int pow = 1;                // Valor decimal de cada posição binária
+
+    /* Verifica se o número a ser convertido é negativo.  */
+    if ((*num)[0] == 1) {
+        *num = complement(num, numLen);
+        flipSign = 1;
+    }
+
+    for (int i = numLen - 1; i > 0; i--) {
+        pow = 1;
+        for (int j = numLen - 1; j > i; j--)
+            pow *= 2;
+        dec += (*num)[i] * pow;
+    }
+
+    if (flipSign == 1)
+        return (dec * (-1));
+
+    return dec;
+}
+
+/*
+ *  CONVERTE UM NÚMERO BINÁRIO PARA DECIMAL
+ *  Parâmetro: Número binário (vetor) de base, quantidade de dígitos do número, quantidade de dígitos para ser impressa na resposta..
+ *  Ação:      Multiplicar o número 'base' por ele mesmo 'pow' vezes.
+ *  Retorna:   Vetor com o resultado.
+ */
+int* pow_binary (int** base, int** pow, int baseLen, int powLen, int* resultLen)
+{
+    int switchSign = 0;
+    int oddTest = bin_to_dec(pow, powLen);      // Utilizado para testar se o expoente é ímpar
+
+    /*Se a base for ímpar e o expoente também for ímpar, alterar o sinal do resultado*/
+    if ( (*base)[0] == 1 && (oddTest % 2 != 0) )
+        switchSign = 1;
+
+    if ((*base)[0] == 1)
+        *base = complement(base, baseLen);
+
+    int* total = *base;
+    int powDec = bin_to_dec(pow, powLen);       // Expoente decimal
+    int totalLen = baseLen;
+
+    // Multiplica r abase por ela mesma powDec vezes
+    for (int i = 0; i < powDec - 1; i++)
+        total = mult_binary(base, &total, baseLen, totalLen, &totalLen);
+
+    *resultLen = totalLen;
+
+    if (switchSign == 1)
+        return complement(&total, totalLen);
+    else
+        return total;
+}
+
+/*
+*  DIVIDE DOIS NÚMEROS BINÁRIOS
+*  Parâmetro: Número binário (vetor) de base, quantidade de dígitos do número, 'r' para visualizar o resto, 'q' para o quociente.
+*  Ação:      Subtrair o divisor pelo resto até que o resto seja maior que o próprio divisor. Utiliza valores positivos e faz a conversão de sinais depois.
+*  Retorna:   Vetor com o resultado.
+*/
+int* div_binary (int** num1, int** num2, int num1Len, int num2Len, char opt) // divisão e resto
+{
+    /* Número 01 em binário */
+    int* aux = calloc(2, sizeof(int));
+    aux[0] = 0;
+    aux[1] = 1;
+
+    int switchSign = 0;
+    if ((*num1)[0] != (*num2)[0])
+        switchSign  = 1;
+
+    if(bin_to_dec(num2, num2Len) == 0) {
+       printf("Não é possível dividir por zero.\n");
+       return NULL;
+    }
+
+    if ((*num2)[0] == 1)
+        *num2 = complement(num2, num2Len);
+    if ((*num1)[0] == 1)
+        *num1 = complement(num1, num1Len);
+
+    int* quoc = calloc(num1Len, sizeof(int));
+    check_malloc(quoc);
+
+    int remainLen = num1Len > num2Len ? num1Len : num2Len;
+    int* remain = *num1;
+
+    if(bin_to_dec(num2, num2Len) != 1 && bin_to_dec(num1, num1Len) != 1) {
+        while(bin_to_dec(&remain, remainLen) >= bin_to_dec(num2, num2Len)) {
+            remain = sub_binary(&remain, num2, remainLen, num2Len);
+            quoc   = sum_binary(&quoc, &aux, num1Len, 2);
+        }
+    }
+
+    if (switchSign == 1) {
+        printf("switch\n");
+        remain = complement(&remain, remainLen);
+        quoc   = complement(&quoc, num1Len);
+    }
+
+    if (opt == 'r')
+        return remain;
+    else if (opt == 'q')
+        return quoc;
 }
 
 /* ASSEGURAR QUE UMA ALOCAÇÃO DE MEMÓRIA FOI BEM-SUCEDIDA. */
-void conferirMalloc (void *ptr)
+void check_malloc(void *ptr)
 {
-    if (ptr == NULL)
-    {
+    if (ptr == NULL) {
         printf("[!] Erro ao alocar memória. Reinicie o programa.\n");
         exit (1);
     }
 }
+
+/* Não consegui implementar o cálculo binário de fatorial. O código abaixo foi a última tentativa, e não funciona.*/
+/*int* fact_binary(int** base, int baseLen, int* printlLen)
+{
+
+    int* aux = calloc(2, sizeof(int));
+    aux[0] = 0;
+    aux[1] = 1;
+    int* counter = *base;   // All integers below the base
+
+    counter = sub_binary(&counter, &aux, baseLen, 2);
+
+    int* partial = *base;
+    int totalLen = baseLen;
+    int* total = calloc(baseLen*2, sizeof(int));
+
+    for (int i = 0; i <= bin_to_dec(base, baseLen); i++) {
+        partial = mult_binary(&partial, &counter, totalLen, baseLen, &totalLen);
+        total = sum_binary(&total, &partial, totalLen, totalLen);
+        counter = sub_binary(&counter, &aux, baseLen, 2);
+    }
+
+    printf("fatorial: ");
+    printBin(&partial, totalLen);
+    printf("\n");
+    return NULL;
+}
+*/
