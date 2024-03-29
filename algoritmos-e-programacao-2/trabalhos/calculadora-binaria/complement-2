@@ -16,7 +16,7 @@ int* sum_binary  (int** num1, int** num2, int num1Len, int num2Len);
 int* sub_binary  (int** num1, int** num2, int num1Len, int num2Len);
 int* mult_binary (int** num1, int** num2, int num1Len, int num2Len, int* productLen);
 int bin_to_dec(int** num, int numLen);
-int* pow_binary (int** base, int** exp, int baseLen, int expLen);
+int* pow_binary (int** base, int** pow, int baseLen, int powLen, int* resultLen);
 
 void printBin  (int** bin, int len);
 int  printMenu (void);
@@ -85,7 +85,7 @@ int main ()
                 printf("^ ");
                 num2Len = get_binary(&num2);
 
-                total = pow_binary (&num1, &num2, num1Len, num2Len);
+                total = pow_binary (&num1, &num2, num1Len, num2Len, &totalLen);
                 break;
             case 7: // complemento
                 num1Len = get_binary(&num1);
@@ -339,7 +339,7 @@ int* mult_binary (int** num1, int** num2, int num1Len, int num2Len, int* product
     if (switchSign == 1)
         total = complement(&total, k);
 
-    *productLen = k;
+    *productLen = k;        // variável usada exclusivamente para imprimir o resultado na tela, quando necessário
     return total;
 }
 
@@ -369,28 +369,31 @@ int bin_to_dec(int** num, int numLen)
     return dec;
 }
 
-int* pow_binary (int** base, int** exp, int baseLen, int expLen)
+int* pow_binary (int** base, int** pow, int baseLen, int powLen, int* resultLen)
 {
+    int switchSign = 0;
+    int oddTest = bin_to_dec(pow, powLen);      // testar se o expoente é ímpar
+
+    /*Se a base for ímpar e o expoente também for ímpar, alterar o sinal do resultado*/
+    if ( (*base)[0] == 1 && (oddTest % 2 != 0) )
+        switchSign = 1;
+
+    if ((*base)[0] == 1)
+        *base = complement(base, baseLen);
+
     int* total = *base;
-    printf("total início: ");  printBin(&total, baseLen); printf("\n");
-    printf("base início: ");  printBin(base, baseLen); printf("\n");
-    int* aux = calloc(2, sizeof(int));
-    aux[1] = 1;
-
+    int powDec = bin_to_dec(pow, powLen);       // Expoente decimal
     int totalLen = baseLen;
-    int expo = bin_to_dec(exp, expLen);
 
-    while ( expo-- > 0) {
-        printBin(&total, baseLen); printf(" * ");printBin(base, baseLen); printf(" = ");
+    // Multiplica r abase por ela mesma powDec vezes
+    for (int i = 0; i < powDec - 1; i++)
+        total = mult_binary(base, &total, baseLen, totalLen, &totalLen);
 
-        //total = mult_binary(base, &total, baseLen, totalLen);
-        totalLen = baseLen * 2;
+    /*Altera o sinal se a base é negativa e o expoente é ímpar*/
+    *resultLen = totalLen;
 
-        printBin(&total, totalLen); printf("\n");
-    }
-
-    printf("exponenciação: ");
-    printBin(&total, totalLen);
-
-    return 0;
+    if (switchSign == 1)
+        return complement(&total, totalLen);
+    else
+        return total;
 }
