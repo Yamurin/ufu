@@ -1,0 +1,25 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int maxpot(int x, int y, int MAX)
+{
+    int power = 1;
+    
+    while (y--)
+        power *= x;
+    
+    if (power > MAX || power == 0)
+        return 1;
+    else
+        return power;
+}
+
+int main()
+{
+    int x, y, MAX;
+   printf("x y MAX: ");
+   scanf("%d %d %d", &x, &y, &MAX);
+   
+   printf("= %d\n", maxpot(x, y, MAX));
+    return 0;
+}
