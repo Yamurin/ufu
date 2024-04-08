@@ -1,0 +1,52 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct produto_t {
+    char nome[80];
+    double preco;
+    int qtd;
+} produto_t;
+
+double* valorTotalRef (produto_t* prod)
+{
+    double* total = malloc(sizeof(int));
+    *total = prod->preco * prod->qtd;
+    
+    return total;
+}
+
+double valorTotal (produto_t* prod)
+{
+    double total = prod->preco * prod->qtd;
+    return total;
+}
+
+produto_t* maiorValor(produto_t* prod1, produto_t* prod2)
+{
+    if (prod1->preco > prod2->preco) 
+        return prod1;
+     else 
+        return prod2;
+}
+
+int main()
+{
+    produto_t prod1;
+    produto_t prod2;
+    double* total = NULL;
+    
+    prod1 = (produto_t){.nome = "Produto 1", .preco = 10.90, .qtd = 5};
+    prod2 = (produto_t){.nome = "Produto 2", .preco = 20.50, .qtd = 2};
+    
+    produto_t* aux = maiorValor(&prod1, &prod2);
+    printf("Produto de maior valor: %s (%.2lf)\n", aux->nome, aux->preco);
+    printf("\nValor total:\nProduto 1: %.2lf\tProduto2: %.2lf\n", valorTotal(&prod1), valorTotal(&prod2));
+    
+    printf("\nValor total (Referencia):\n");
+    total = valorTotalRef(&prod1);
+    printf("Produto 1: %.2lf\t", *total);
+    total = valorTotalRef(&prod2);
+    printf("Produto 2: %.2lf\n", *total);
+    
+    return 0;
+}
