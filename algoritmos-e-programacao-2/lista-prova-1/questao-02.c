@@ -1,7 +1,3 @@
-/*
-    Rayane Reis Mota
-    12311BSI233
-*/
 
 #include <string.h>
 #include <stdio.h>
