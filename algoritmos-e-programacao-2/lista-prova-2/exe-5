@@ -1,0 +1,36 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int main()
+{
+    FILE* fp = fopen("nums.bin", "wb");
+    double num[10];
+    double soma = 0;
+    double aux;
+    
+    if (fp == NULL) {
+        printf("Falha ao criar arquivo.\n");
+        exit(1);
+    }
+    
+    printf("Antes: \n");
+    for (int i = 0; i < 10; i++) {
+        num[i] = i * 3 + 2.5; 
+        printf("%.2lf\t", num[i]);        
+    }
+
+    fwrite(&num, sizeof(double), 10, fp);
+    fclose(fp);
+    fp = fopen("nums.bin", "rb");
+    
+    
+    printf("\nDepois:\n");
+    for (int i = 0; i < 10; i++) {
+        fread(&aux, sizeof(double), 1, fp);
+        soma += aux;
+    }
+    
+    printf("\nSoma: %.2lf\tMedia: %.2lf\n", soma, soma / 10);
+    fclose(fp);
+    return 0;
+}
