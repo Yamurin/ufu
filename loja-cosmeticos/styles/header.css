@@ -1,0 +1,36 @@
+
+.cabeçalho {
+    background-color: var(--amarelo-claro);
+}
+
+.cabeçalho__titulo {
+    font-family: var(--fonte-titulo), "Times New Roman", sans-serif;
+    font-weight: 700;
+    padding: 2.5em 0 2em 0;
+    text-align: center;
+}
+
+.cabeçalho__pesquisa {
+    text-align: center;
+    color: var(--branco);
+    font-family: sans-serif;
+    padding: 1em;
+    background-color: var(--laranja);
+    border: none;
+    border-radius: 25px;
+    width: 90%;
+    margin: 0 1.5em 2em 1.5em;
+}
+
+.cabeçalho__pesquisa::placeholder {
+    opacity: 1;
+    color: var(--branco);
+    font-family: sans-serif;
+    font-size: 1em;
+    font-weight: 400;
+    text-indent: 50%;
+    text-align: center;
+    background: url("../img/lupa.svg") no-repeat;
+    background-position: 2em;
+    background-size: 1.2em;
+}
